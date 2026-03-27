@@ -32,6 +32,9 @@ This repo includes `render.yaml` for one-click deployment.
 3. Select your GitHub repo and deploy.
 4. After deploy, open the generated Render URL in browser.
 
+No Render Shell is required for first launch.
+The app now runs migrations and seeds schemes automatically on startup when the database is empty.
+
 If your Render app name is different, update:
 - `ALLOWED_HOSTS`
 - `CSRF_TRUSTED_ORIGINS`
@@ -42,4 +45,3 @@ Both can be changed in Render environment variables.
 
 - Django apps cannot be hosted on GitHub Pages (static-only).
 - Use GitHub for code hosting, and Render/Railway/Fly for live deployment.
-

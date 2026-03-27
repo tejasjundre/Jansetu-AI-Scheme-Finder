@@ -7,7 +7,18 @@ from women_app.models import Scheme
 class Command(BaseCommand):
     help = "Seed the scheme table using the bundled JSON dataset."
 
+    def add_arguments(self, parser):
+        parser.add_argument(
+            "--if-empty",
+            action="store_true",
+            help="Seed only when the Scheme table is empty.",
+        )
+
     def handle(self, *args, **options):
+        if options.get("if_empty") and Scheme.objects.exists():
+            self.stdout.write(self.style.WARNING("Scheme table already has data. Skipping seed."))
+            return
+
         processed = 0
         created_count = 0
         for record in load_seed_schemes():
