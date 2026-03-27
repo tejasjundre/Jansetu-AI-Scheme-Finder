@@ -23,6 +23,7 @@ def _env_int(name: str, default: int) -> int:
 
 NEWS_CACHE_SECONDS = _env_int("NEWS_CACHE_SECONDS", 60 * 30)
 STALE_NEWS_CACHE_SECONDS = _env_int("STALE_NEWS_CACHE_SECONDS", 60 * 60 * 24)
+NEWS_META_FETCH_LIMIT = max(0, _env_int("NEWS_META_FETCH_LIMIT", 3))
 
 SCHEME_KEYWORDS = {
     "scheme": 8,
@@ -60,7 +61,7 @@ SOCIAL_IMAGE_KEYWORDS = ("facebook", "linkedin", "whatsapp", "email", "twitter",
 
 def _http_text(url: str) -> str:
     request = Request(url, headers=REQUEST_HEADERS)
-    with urlopen(request, timeout=int(os.getenv("NEWS_FETCH_TIMEOUT_SECONDS", "4"))) as response:
+    with urlopen(request, timeout=int(os.getenv("NEWS_FETCH_TIMEOUT_SECONDS", "3"))) as response:
         return response.read().decode("utf-8", "ignore")
 
 
@@ -135,10 +136,18 @@ def get_launch_news(limit: int = 6) -> List[Dict[str, str]]:
         items.append({"title": title, "url": url, "score": score, "position": position, "feed_summary": feed_summary})
 
     results = []
-    for item in items[: max(limit, 1)]:
-        try:
-            meta = _article_meta(item["url"])
-        except Exception:
+    selected_items = items[: max(limit, 1)]
+    for position, item in enumerate(selected_items):
+        if position < NEWS_META_FETCH_LIMIT:
+            try:
+                meta = _article_meta(item["url"])
+            except Exception:
+                meta = {
+                    "summary": "",
+                    "published_on": "",
+                    "image_url": DEFAULT_NEWS_IMAGE,
+                }
+        else:
             meta = {
                 "summary": "",
                 "published_on": "",

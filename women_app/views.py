@@ -149,7 +149,7 @@ def home(request):
             request,
             {
                 "scheme_count": len(schemes),
-                "category_count": len(available_categories()),
+                "category_count": len(available_categories(schemes)),
                 "state_count": len(covered_states) or 1,
                 "stale_scheme_count": sum(1 for scheme in schemes if scheme["needs_freshness_review"]),
                 "home_needs": get_content_list("home_needs", lang),

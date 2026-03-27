@@ -5,6 +5,7 @@ from datetime import date, datetime, timedelta
 from typing import Dict, Iterable, List, Optional
 from urllib.parse import urlparse
 
+from django.core.cache import cache
 from django.db.models import Q
 
 from .models import EligibilityAssessment, Scheme
@@ -70,6 +71,11 @@ EFFORT_ESTIMATES = {
     "medium": "3 to 10 days",
     "high": "1 to 3 weeks",
 }
+
+try:
+    SCHEME_CACHE_SECONDS = max(60, int(str(os.getenv("SCHEME_CACHE_SECONDS", "300")).strip()))
+except (TypeError, ValueError):
+    SCHEME_CACHE_SECONDS = 300
 
 
 def match_score_percent(score: int) -> int:
@@ -265,18 +271,42 @@ def _db_scheme_records() -> List[Dict]:
     return []
 
 
+def _scheme_cache_signature() -> str:
+    """
+    Build a lightweight signature so cached normalized scheme data refreshes
+    automatically when record count or max PK changes.
+    """
+    # Avoid importing extra aggregate helpers on hot paths; use cheap queries.
+    try:
+        count = Scheme.objects.count()
+        max_id_row = Scheme.objects.order_by("-id").values_list("id", flat=True).first()
+        max_id = int(max_id_row or 0)
+        return f"{count}:{max_id}"
+    except Exception:
+        return "fallback"
+
+
 def get_all_schemes() -> List[Dict]:
+    signature = _scheme_cache_signature()
+    cache_key = f"all_schemes:v2:{signature}"
+    cached = cache.get(cache_key)
+    if cached is not None:
+        return cached
+
     raw_records = _db_scheme_records() or _load_schemes_from_json()
-    return [normalize_scheme_record(record) for record in raw_records if record.get("name")]
+    normalized = [normalize_scheme_record(record) for record in raw_records if record.get("name")]
+    cache.set(cache_key, normalized, timeout=SCHEME_CACHE_SECONDS)
+    return normalized
 
 
 def load_seed_schemes() -> List[Dict]:
     return [normalize_scheme_record(record) for record in _load_schemes_from_json() if record.get("name")]
 
 
-def available_categories() -> List[Dict]:
+def available_categories(schemes: Optional[List[Dict]] = None) -> List[Dict]:
+    source = schemes if schemes is not None else get_all_schemes()
     categories = {}
-    for scheme in get_all_schemes():
+    for scheme in source:
         categories[scheme["category"]] = scheme["category_label"]
 
     ordered = []
