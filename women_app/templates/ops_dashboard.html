@@ -1,0 +1,222 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ t.ops_title }} | {{ t.brand_name }}{% endblock %}
+{% block body_class %}page-ops{% endblock %}
+
+{% block content %}
+<section class="page-hero premium-hero compact">
+  <span class="section-kicker">{{ t.ops_title }}</span>
+  <h1>{{ t.ops_subtitle }}</h1>
+  <p class="lead-copy compact-copy">Operations view for support load, scheme freshness, broken links, and review workflows.</p>
+</section>
+
+<section class="stats-grid ops-grid premium-stats-grid">
+  <article class="stat-card premium-stat-card">
+    <span class="panel-label">Review queue</span>
+    <strong>{{ unanswered_queries }}</strong>
+    <span>unanswered or low-confidence queries</span>
+  </article>
+  <article class="stat-card premium-stat-card">
+    <span class="panel-label">Support queue</span>
+    <strong>{{ pending_escalations }}</strong>
+    <span>pending human support requests</span>
+  </article>
+  <article class="stat-card premium-stat-card">
+    <span class="panel-label">Overdue</span>
+    <strong>{{ overdue_escalations }}</strong>
+    <span>escalations beyond SLA</span>
+  </article>
+  <article class="stat-card premium-stat-card">
+    <span class="panel-label">Unassigned</span>
+    <strong>{{ unassigned_escalations }}</strong>
+    <span>cases waiting for an owner</span>
+  </article>
+  <article class="stat-card premium-stat-card">
+    <span class="panel-label">Stale schemes</span>
+    <strong>{{ stale_scheme_count }}</strong>
+    <span>freshness reminders pending</span>
+  </article>
+  <article class="stat-card premium-stat-card">
+    <span class="panel-label">Broken links</span>
+    <strong>{{ broken_link_count }}</strong>
+    <span>records with missing or failed source links</span>
+  </article>
+</section>
+
+<section class="content-section split-grid">
+  <article class="premium-panel ops-chart-card">
+    <div class="section-heading compact">
+      <span class="section-kicker">System pressure</span>
+      <h2>Operational health snapshot</h2>
+    </div>
+    <div class="ops-bar-list">
+      {% for item in ops_overview_rows %}
+      <div class="ops-bar-row">
+        <div class="ops-bar-label">
+          <strong>{{ item.label }}</strong>
+          <span>{{ item.value }}</span>
+        </div>
+        <div class="ops-bar-track">
+          <span class="ops-bar-fill tone-{{ item.tone }}" style="width: {{ item.width }}%"></span>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </article>
+
+  <article class="premium-panel ops-chart-card">
+    <div class="section-heading compact">
+      <span class="section-kicker">Demand</span>
+      <h2>Most requested schemes</h2>
+    </div>
+    <div class="ops-bar-list">
+      {% for item in demand_rows %}
+      <div class="ops-bar-row">
+        <div class="ops-bar-label">
+          <strong>{{ item.label }}</strong>
+          <span>{{ item.value }}</span>
+        </div>
+        <div class="ops-bar-track">
+          <span class="ops-bar-fill tone-indigo" style="width: {{ item.width }}%"></span>
+        </div>
+      </div>
+      {% empty %}
+      <p class="small-muted">No recommendation trends recorded yet.</p>
+      {% endfor %}
+    </div>
+  </article>
+</section>
+
+<section class="content-section split-grid">
+  <article class="premium-panel">
+    <div class="section-heading compact">
+      <span class="section-kicker">Freshness</span>
+      <h2>Scheme reminders</h2>
+    </div>
+    <div class="ops-list-stack">
+      {% for scheme in stale_schemes %}
+      <article class="ops-list-item">
+        <strong>{{ scheme.name }}</strong>
+        <span>{{ scheme.last_verified_on|default:t.not_set }}</span>
+      </article>
+      {% empty %}
+      <p class="small-muted">No stale schemes detected.</p>
+      {% endfor %}
+    </div>
+  </article>
+
+  <article class="premium-panel">
+    <div class="section-heading compact">
+      <span class="section-kicker">Integrity</span>
+      <h2>Broken link alerts</h2>
+    </div>
+    <div class="ops-list-stack">
+      {% for scheme in broken_links %}
+      <article class="ops-list-item">
+        <strong>{{ scheme.name }}</strong>
+        <span>{{ scheme.verification_status }} | {{ scheme.url|default:"missing official URL" }}</span>
+      </article>
+      {% empty %}
+      <p class="small-muted">No broken link alerts.</p>
+      {% endfor %}
+    </div>
+  </article>
+</section>
+
+<section class="content-section split-grid">
+  <article class="premium-panel ops-workflow-card">
+    <div class="section-heading compact">
+      <span class="section-kicker">Workflow</span>
+      <h2>Escalation workflow</h2>
+    </div>
+    <div class="ops-escalation-list">
+      {% for item in recent_escalations %}
+      <article class="ops-escalation-item{% if item.is_overdue %} is-overdue{% endif %}">
+        <header class="ops-escalation-head">
+          <div>
+            <strong>{{ item.name }}</strong>
+            <p class="small-muted">{{ item.get_support_type_display }} | {{ item.state }}{% if item.district %}, {{ item.district }}{% endif %}</p>
+          </div>
+          <span class="badge-soft {% if item.is_overdue %}badge-broken{% elif item.status == 'resolved' %}badge-verified{% else %}badge-review{% endif %}">
+            {{ item.get_status_display }}
+          </span>
+        </header>
+        <p class="small-muted">{{ item.phone_number }}{% if item.email %} | {{ item.email }}{% endif %}</p>
+        <p>{{ item.message|truncatechars:140 }}</p>
+
+        <form method="post" class="ops-escalation-form">
+          {% csrf_token %}
+          <input type="hidden" name="escalation_id" value="{{ item.id }}">
+          <div class="form-grid two">
+            <label class="field-block">
+              <span>Status</span>
+              <select name="status">
+                <option value="new" {% if item.status == "new" %}selected{% endif %}>New</option>
+                <option value="in_progress" {% if item.status == "in_progress" %}selected{% endif %}>In Progress</option>
+                <option value="resolved" {% if item.status == "resolved" %}selected{% endif %}>Resolved</option>
+              </select>
+            </label>
+            <label class="field-block">
+              <span>Assignee</span>
+              <select name="assigned_to">
+                <option value="">Unassigned</option>
+                {% for user in ops_assignable_users %}
+                <option value="{{ user.id }}" {% if item.assigned_to_id == user.id %}selected{% endif %}>{{ user.username }}</option>
+                {% endfor %}
+              </select>
+            </label>
+            <label class="field-block">
+              <span>Due by</span>
+              <input type="datetime-local" name="due_at" value="{% if item.due_at %}{{ item.due_at|date:'Y-m-d\\TH:i' }}{% else %}{{ default_due_at }}{% endif %}">
+            </label>
+            <label class="field-block">
+              <span>Resolution notes</span>
+              <textarea name="resolution_notes" rows="2">{{ item.resolution_notes }}</textarea>
+            </label>
+          </div>
+          <div class="wizard-actions">
+            <button type="submit" class="btn btn-dark btn-pill">Save update</button>
+          </div>
+        </form>
+      </article>
+      {% empty %}
+      <p class="small-muted">No human support requests yet.</p>
+      {% endfor %}
+    </div>
+  </article>
+
+  <div class="ops-side-stack">
+    <article class="premium-panel">
+      <div class="section-heading compact">
+        <span class="section-kicker">Queries</span>
+        <h2>Recent review queue</h2>
+      </div>
+      <div class="ops-list-stack">
+        {% for item in recent_queries %}
+        <article class="ops-list-item">
+          <strong>{{ item.created_at|date:"d M Y H:i" }}</strong>
+          <span>{{ item.user_message|truncatechars:90 }} {% if item.needs_human_review %}(review){% endif %}</span>
+        </article>
+        {% endfor %}
+      </div>
+    </article>
+
+    <article class="premium-panel">
+      <div class="section-heading compact">
+        <span class="section-kicker">Audit</span>
+        <h2>Recent events</h2>
+      </div>
+      <div class="ops-list-stack">
+        {% for item in recent_audit_logs %}
+        <article class="ops-list-item">
+          <strong>{{ item.method }} {{ item.path }}</strong>
+          <span>Status {{ item.status_code }}</span>
+        </article>
+        {% empty %}
+        <p class="small-muted">No audit events yet.</p>
+        {% endfor %}
+      </div>
+    </article>
+  </div>
+</section>
+{% endblock %}

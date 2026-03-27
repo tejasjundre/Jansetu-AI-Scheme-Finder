@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ t.privacy_title }} | {{ t.brand_name }}{% endblock %}
+{% block body_class %}page-privacy{% endblock %}
+
+{% block content %}
+<section class="page-hero premium-hero compact">
+  <span class="section-kicker">{{ t.privacy_title }}</span>
+  <h1>{{ t.privacy_subtitle }}</h1>
+</section>
+
+<section class="content-section split-grid">
+  <article class="soft-card">
+    <h2>{{ t.privacy_store_title }}</h2>
+    <ul class="plain-steps">
+      {% for item in privacy_store_items %}
+      <li>{{ item }}</li>
+      {% endfor %}
+    </ul>
+  </article>
+
+  <article class="soft-card">
+    <h2>{{ t.privacy_use_title }}</h2>
+    <ul class="plain-steps">
+      {% for item in privacy_use_items %}
+      <li>{{ item }}</li>
+      {% endfor %}
+    </ul>
+  </article>
+</section>
+{% endblock %}

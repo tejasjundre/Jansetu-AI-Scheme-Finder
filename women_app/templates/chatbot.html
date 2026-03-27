@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ t.chat_title }} | {{ t.brand_name }}{% endblock %}
+{% block body_class %}page-chat{% endblock %}
+
+{% block content %}
+<section class="page-hero premium-hero compact">
+  <span class="section-kicker">{{ t.chat_title }}</span>
+  <h1>{{ t.chat_heading }}</h1>
+  <p class="lead-copy compact-copy">{{ t.chat_subtitle }}</p>
+  <div class="trust-ribbon">
+    <span class="promise-chip">{{ t.chat_promise_1 }}</span>
+    <span class="promise-chip">{{ t.chat_promise_2 }}</span>
+    <span class="promise-chip">{{ t.chat_promise_3 }}</span>
+  </div>
+</section>
+
+<section class="chat-product-shell premium-chat-layout">
+  <section
+    class="chat-panel premium-chat-panel"
+    data-chat-url="{% url 'chat_api' %}"
+    data-stt-url="{% url 'speech_to_text_api' %}"
+    data-tts-url="{% url 'text_to_speech_api' %}"
+    data-current-lang="{{ current_lang }}"
+  >
+    <div class="chat-header premium-chat-header">
+      <div class="assistant-heading">
+        <span class="assistant-dot"></span>
+        <div>
+          <strong>{{ t.chat_assistant_title }}</strong>
+          <div class="small-muted">{{ t.chat_assistant_subtitle }}</div>
+        </div>
+      </div>
+
+      <div class="chat-controls">
+        <label class="chat-lang-pill" for="speechLang">
+          <span>{{ t.lang_label }}</span>
+          <select id="speechLang" aria-label="{{ t.lang_label }}">
+            <option value="en" {% if current_lang == "en" %}selected{% endif %}>English</option>
+            <option value="hi" {% if current_lang == "hi" %}selected{% endif %}>Hindi</option>
+            <option value="mr" {% if current_lang == "mr" %}selected{% endif %}>Marathi</option>
+          </select>
+        </label>
+        <button type="button" class="ghost-btn voice-pulse-btn" id="micBtn">{{ t.voice_listen }}</button>
+        <button type="button" class="ghost-btn" id="voiceToggle">{{ t.voice_read }}</button>
+      </div>
+    </div>
+
+    <div class="prompt-strip premium-prompt-strip">
+      {% for prompt in chat_prompts %}
+      <button type="button" class="prompt-chip" data-prompt="{{ prompt }}">{{ prompt }}</button>
+      {% endfor %}
+    </div>
+
+    <div id="chatBox" class="chat-body premium-chat-body" aria-live="polite"></div>
+
+    <div id="chatRecommendations" class="chat-recommendations premium-chat-recommendations"></div>
+
+    <div class="chat-input premium-chat-input">
+      <textarea id="userInput" rows="2" placeholder="{{ t.chat_placeholder }}"></textarea>
+      <button id="sendBtn" type="button" class="btn btn-dark btn-pill send-btn">{{ t.send }}</button>
+    </div>
+  </section>
+
+  <aside class="wizard-sidecard premium-side-panel chat-side-panel">
+    <span class="section-kicker">{{ t.chat_best_for_kicker }}</span>
+    <h2>{{ t.chat_best_for_title }}</h2>
+    <ul class="plain-steps polished-list">
+      {% for item in chat_best_for %}
+      <li>{{ item }}</li>
+      {% endfor %}
+    </ul>
+
+    <div class="side-feature-stack">
+      <article class="support-note-card">
+        <span class="panel-label">Voice ready</span>
+        <p>Tap the microphone, speak naturally, and let JanSetu convert speech into a simpler scheme path.</p>
+      </article>
+      <article class="support-note-card">
+        <span class="panel-label">Low-friction flow</span>
+        <p>Suggested prompts and quick details help new users ask in plain everyday language.</p>
+      </article>
+    </div>
+
+    <a href="{% url 'wizard' %}?lang={{ current_lang }}" class="btn btn-outline-dark btn-pill sidecard-cta">{{ t.prefer_wizard }}</a>
+  </aside>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/chatbot.js' %}"></script>
+{% endblock %}

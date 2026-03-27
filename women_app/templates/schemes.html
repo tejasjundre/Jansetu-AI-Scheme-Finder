@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ t.schemes_title }} | {{ t.brand_name }}{% endblock %}
+{% block body_class %}page-schemes{% endblock %}
+
+{% block content %}
+<section class="page-hero premium-hero compact">
+  <span class="section-kicker">{{ t.schemes_title }}</span>
+  <h1>{{ t.schemes_heading }}</h1>
+  <p class="lead-copy compact-copy">{{ t.schemes_subtitle }}</p>
+</section>
+
+<section class="stats-grid compact-stats premium-stats-grid">
+  <article class="stat-card premium-stat-card">
+    <span class="panel-label">{{ t.catalogue_records }}</span>
+    <strong>{{ scheme_total }}</strong>
+  </article>
+  <article class="stat-card premium-stat-card">
+    <span class="panel-label">{{ t.simple_categories }}</span>
+    <strong>{{ categories|length }}</strong>
+  </article>
+  <article class="stat-card premium-stat-card">
+    <span class="panel-label">{{ t.current_page }}</span>
+    <strong>{{ page_obj.number }}</strong>
+  </article>
+</section>
+
+<form method="get" class="filter-bar premium-filter-bar">
+  <input type="hidden" name="lang" value="{{ current_lang }}">
+  <input type="text" name="q" value="{{ selected_query }}" class="form-control filter-input" placeholder="{{ t.schemes_search_placeholder }}">
+  <select name="category" class="form-select filter-select" aria-label="{{ t.filter_all_categories }}">
+    <option value="">{{ t.filter_all_categories }}</option>
+    {% for category in categories %}
+    <option value="{{ category.value }}" {% if selected_category == category.value %}selected{% endif %}>{{ category.label }}</option>
+    {% endfor %}
+  </select>
+  <select name="state" class="form-select filter-select" aria-label="{{ t.filter_all_states }}">
+    <option value="">{{ t.filter_all_states }}</option>
+    {% for state in state_options %}
+    <option value="{{ state }}" {% if selected_state == state %}selected{% endif %}>{{ state }}</option>
+    {% endfor %}
+  </select>
+  <select name="sort" class="form-select filter-select" aria-label="Sort results">
+    <option value="recommended" {% if selected_sort == "recommended" %}selected{% endif %}>Best quality</option>
+    <option value="recent" {% if selected_sort == "recent" %}selected{% endif %}>Recently verified</option>
+    <option value="expiry" {% if selected_sort == "expiry" %}selected{% endif %}>Closing soon</option>
+    <option value="name" {% if selected_sort == "name" %}selected{% endif %}>Name A-Z</option>
+  </select>
+  <button type="submit" class="btn btn-dark btn-pill">{{ t.apply_filters }}</button>
+</form>
+
+<section id="schemeContainer" class="scheme-grid premium-scheme-grid">
+  {% for scheme in schemes %}
+  <article class="scheme-card premium-scheme-card">
+    <div class="scheme-card-top">
+      <div class="scheme-head-row">
+        <span class="scheme-tag">{{ scheme.category_label }}</span>
+        <span class="badge-soft {% if scheme.verification_status == 'verified' %}badge-verified{% elif scheme.verification_status == 'broken' %}badge-broken{% else %}badge-review{% endif %}">
+          {{ scheme.verification_status|title }}
+        </span>
+      </div>
+      <h2>{{ scheme.name }}</h2>
+      <p>{{ scheme.description }}</p>
+    </div>
+
+    <div class="scheme-meta premium-meta-grid">
+      <span><strong>{{ t.detail_source_label }}</strong> {{ scheme.official_source_name|default:t.official_source_pending }}</span>
+      <span><strong>{{ t.detail_coverage_label }}</strong> {{ scheme.state_coverage|join:", " }}</span>
+      <span><strong>{{ t.detail_last_verified_label }}</strong> {{ scheme.last_verified_on|default:t.not_set }}</span>
+    </div>
+
+    <div class="reason-list">
+      {% for tag in scheme.beneficiary_tags|slice:":4" %}
+      <span class="reason-chip">{{ tag|title }}</span>
+      {% endfor %}
+    </div>
+
+    <div class="result-snapshot-grid">
+      <article class="snapshot-tile">
+        <span class="panel-label">{{ t.what_to_do_next }}</span>
+        <p>{{ scheme.next_steps.where_to_apply|default:scheme.where_to_apply|default:t.scheme_apply_fallback }}</p>
+      </article>
+      <article class="snapshot-tile">
+        <span class="panel-label">{{ t.detail_effort_level_label }}</span>
+        <p>{{ scheme.effort_level|title }}</p>
+      </article>
+    </div>
+
+    <details class="detail-disclosure">
+      <summary>Expand details</summary>
+      <div class="detail-disclosure-body">
+        <div class="result-detail">
+          <strong>{{ t.documents_label }}</strong>
+          <ul class="plain-steps">
+            {% for doc in scheme.required_documents|slice:":5" %}
+            <li>{{ doc }}</li>
+            {% empty %}
+            <li>{{ t.documents_fallback }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+        <div class="result-detail">
+          <strong>District coverage</strong>
+          <p>
+            {% if scheme.district_coverage %}
+            {{ scheme.district_coverage|slice:":6"|join:", " }}{% if scheme.district_coverage|length > 6 %} and more{% endif %}
+            {% else %}
+            Covered across the listed state scope.
+            {% endif %}
+          </p>
+        </div>
+      </div>
+    </details>
+
+    <div class="result-actions">
+      {% if scheme.slug %}
+      <a href="{% url 'scheme_detail' scheme.slug %}?lang={{ current_lang }}" class="btn btn-dark btn-pill">{{ t.chat_open_details }}</a>
+      {% endif %}
+      {% if scheme.url %}
+      <a href="{{ scheme.url }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-dark btn-pill">{{ t.open_official_page }}</a>
+      {% endif %}
+    </div>
+  </article>
+  {% empty %}
+  <div class="empty-panel">
+    <h3>{{ t.no_matching_schemes }}</h3>
+    <p>{{ t.no_matching_schemes_help }}</p>
+  </div>
+  {% endfor %}
+</section>
+
+{% if page_obj.paginator.num_pages > 1 %}
+<nav class="pagination-bar" aria-label="Scheme pages">
+  {% if page_obj.has_previous %}
+  <a href="?lang={{ current_lang }}&q={{ selected_query }}&category={{ selected_category }}&state={{ selected_state }}&sort={{ selected_sort }}&page={{ page_obj.previous_page_number }}" class="ghost-btn">{{ t.previous }}</a>
+  {% else %}
+  <span class="ghost-btn disabled-chip">{{ t.previous }}</span>
+  {% endif %}
+
+  <span class="pagination-label">{{ t.current_page }} {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+
+  {% if page_obj.has_next %}
+  <a href="?lang={{ current_lang }}&q={{ selected_query }}&category={{ selected_category }}&state={{ selected_state }}&sort={{ selected_sort }}&page={{ page_obj.next_page_number }}" class="ghost-btn">{{ t.next }}</a>
+  {% else %}
+  <span class="ghost-btn disabled-chip">{{ t.next }}</span>
+  {% endif %}
+</nav>
+{% endif %}
+{% endblock %}

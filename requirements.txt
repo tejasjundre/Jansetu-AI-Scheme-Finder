@@ -1,0 +1,10 @@
+django==4.2
+djangorestframework
+python-dotenv
+gunicorn
+whitenoise
+django-redis
+psycopg[binary]
+SpeechRecognition
+gTTS
+pydub

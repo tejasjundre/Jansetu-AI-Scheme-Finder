@@ -1,0 +1,500 @@
+[
+  {
+    "state": "All India",
+    "source_name": "AgroOrbit Agriculture Scheme Directory",
+    "url": "https://agroorbit.com",
+    "category": "financial",
+    "tags": ["farmer", "agriculture", "scheme discovery", "all india"],
+    "is_official": false
+  },
+  {
+    "state": "Andaman and Nicobar Islands",
+    "source_name": "Andaman and Nicobar Administration Portal",
+    "url": "https://andaman.gov.in",
+    "category": "other",
+    "tags": ["state portal", "citizen service", "andaman and nicobar islands"]
+  },
+  {
+    "state": "Andhra Pradesh",
+    "source_name": "Andhra Pradesh State Portal",
+    "url": "https://www.ap.gov.in",
+    "category": "other",
+    "tags": ["state portal", "citizen service", "andhra pradesh"]
+  },
+  {
+    "state": "Andhra Pradesh",
+    "source_name": "JnanaBhumi Scholarship Portal",
+    "url": "https://jnanabhumi.ap.gov.in",
+    "category": "education",
+    "tags": ["student", "scholarship", "andhra pradesh"]
+  },
+  {
+    "state": "Andhra Pradesh",
+    "source_name": "AP Village and Ward Secretariat Services",
+    "url": "https://vswsonline.ap.gov.in",
+    "category": "other",
+    "tags": ["citizen service", "local services", "andhra pradesh"]
+  },
+  {
+    "state": "Arunachal Pradesh",
+    "source_name": "Arunachal Pradesh Government Portal",
+    "url": "https://arunachalpradesh.gov.in",
+    "category": "other",
+    "tags": ["state portal", "citizen service", "arunachal pradesh"]
+  },
+  {
+    "state": "Assam",
+    "source_name": "Assam State Portal",
+    "url": "https://assam.gov.in",
+    "category": "other",
+    "tags": ["state portal", "citizen service", "assam"]
+  },
+  {
+    "state": "Assam",
+    "source_name": "RTPS Assam",
+    "url": "https://rtps.assam.gov.in",
+    "category": "other",
+    "tags": ["citizen service", "certificate", "assam"]
+  },
+  {
+    "state": "Bihar",
+    "source_name": "Bihar e-Services Portal",
+    "url": "https://serviceonline.bihar.gov.in",
+    "category": "other",
+    "tags": ["citizen service", "certificate", "bihar"]
+  },
+  {
+    "state": "Bihar",
+    "source_name": "Bihar MedhaSoft Scholarship",
+    "url": "https://medhasoft.bihar.gov.in",
+    "category": "education",
+    "tags": ["student", "scholarship", "bihar"]
+  },
+  {
+    "state": "Bihar",
+    "source_name": "Bihar State Government Portal",
+    "url": "https://state.bihar.gov.in",
+    "category": "other",
+    "tags": ["state portal", "bihar"]
+  },
+  {
+    "state": "Chandigarh",
+    "source_name": "Chandigarh Administration Portal",
+    "url": "https://chandigarh.gov.in",
+    "category": "other",
+    "tags": ["state portal", "citizen service", "chandigarh"]
+  },
+  {
+    "state": "Chhattisgarh",
+    "source_name": "Chhattisgarh e-District Portal",
+    "url": "https://edistrict.cgstate.gov.in",
+    "category": "other",
+    "tags": ["citizen service", "certificate", "chhattisgarh"]
+  },
+  {
+    "state": "Chhattisgarh",
+    "source_name": "Chhattisgarh State Portal",
+    "url": "https://cgstate.gov.in",
+    "category": "other",
+    "tags": ["state portal", "citizen service", "chhattisgarh"]
+  },
+  {
+    "state": "Dadra and Nagar Haveli and Daman and Diu",
+    "source_name": "DNH and Daman Diu Administration Portal",
+    "url": "https://ddd.gov.in",
+    "category": "other",
+    "tags": ["state portal", "citizen service", "dadra and nagar haveli and daman and diu"]
+  },
+  {
+    "state": "Delhi",
+    "source_name": "Delhi e-District Portal",
+    "url": "https://edistrict.delhigovt.nic.in",
+    "category": "other",
+    "tags": ["citizen service", "certificate", "delhi"]
+  },
+  {
+    "state": "Delhi",
+    "source_name": "Delhi Government Portal",
+    "url": "https://delhi.gov.in",
+    "category": "other",
+    "tags": ["state portal", "delhi"]
+  },
+  {
+    "state": "Goa",
+    "source_name": "Goa Online Services",
+    "url": "https://goaonline.gov.in",
+    "category": "other",
+    "tags": ["citizen service", "certificate", "goa"]
+  },
+  {
+    "state": "Goa",
+    "source_name": "Goa Government Portal",
+    "url": "https://www.goa.gov.in",
+    "category": "other",
+    "tags": ["state portal", "goa"]
+  },
+  {
+    "state": "Gujarat",
+    "source_name": "Digital Gujarat",
+    "url": "https://www.digitalgujarat.gov.in",
+    "category": "education",
+    "tags": ["student", "scholarship", "citizen service", "gujarat"]
+  },
+  {
+    "state": "Gujarat",
+    "source_name": "iKhedut Gujarat Agriculture Support",
+    "url": "https://ikhedut.gujarat.gov.in",
+    "category": "financial",
+    "tags": ["farmer", "agriculture", "subsidy", "gujarat"]
+  },
+  {
+    "state": "Gujarat",
+    "source_name": "Gujarat Social Justice",
+    "url": "https://sje.gujarat.gov.in",
+    "category": "empowerment",
+    "tags": ["social welfare", "disability", "senior citizen", "gujarat"]
+  },
+  {
+    "state": "Haryana",
+    "source_name": "SARAL Haryana",
+    "url": "https://saralharyana.gov.in",
+    "category": "other",
+    "tags": ["citizen service", "certificate", "haryana"]
+  },
+  {
+    "state": "Haryana",
+    "source_name": "Haryana Government Portal",
+    "url": "https://haryana.gov.in",
+    "category": "other",
+    "tags": ["state portal", "haryana"]
+  },
+  {
+    "state": "Himachal Pradesh",
+    "source_name": "Himachal e-District Services",
+    "url": "https://edistrict.hp.gov.in",
+    "category": "other",
+    "tags": ["citizen service", "certificate", "himachal pradesh"]
+  },
+  {
+    "state": "Himachal Pradesh",
+    "source_name": "Himachal Pradesh Government Portal",
+    "url": "https://himachalpradesh.gov.in",
+    "category": "other",
+    "tags": ["state portal", "himachal pradesh"]
+  },
+  {
+    "state": "Jammu and Kashmir",
+    "source_name": "Jammu and Kashmir Government Portal",
+    "url": "https://jk.gov.in",
+    "category": "other",
+    "tags": ["state portal", "citizen service", "jammu and kashmir"]
+  },
+  {
+    "state": "Jharkhand",
+    "source_name": "Jharkhand Government Portal",
+    "url": "https://www.jharkhand.gov.in",
+    "category": "other",
+    "tags": ["state portal", "citizen service", "jharkhand"]
+  },
+  {
+    "state": "Jharkhand",
+    "source_name": "Jharkhand e-Kalyan Scholarship",
+    "url": "https://ekalyan.cgg.gov.in",
+    "category": "education",
+    "tags": ["student", "scholarship", "jharkhand"]
+  },
+  {
+    "state": "Karnataka",
+    "source_name": "Seva Sindhu Karnataka",
+    "url": "https://sevasindhu.karnataka.gov.in",
+    "category": "other",
+    "tags": ["citizen service", "state portal", "karnataka"]
+  },
+  {
+    "state": "Karnataka",
+    "source_name": "Karnataka ePass Scholarships",
+    "url": "https://karepass.cgg.gov.in",
+    "category": "education",
+    "tags": ["student", "scholarship", "karnataka"]
+  },
+  {
+    "state": "Karnataka",
+    "source_name": "Raitha Mitra Karnataka Agriculture",
+    "url": "https://raitamitra.karnataka.gov.in",
+    "category": "financial",
+    "tags": ["farmer", "agriculture", "karnataka"]
+  },
+  {
+    "state": "Kerala",
+    "source_name": "e-District Kerala Services",
+    "url": "https://edistrict.kerala.gov.in",
+    "category": "other",
+    "tags": ["citizen service", "state portal", "kerala"]
+  },
+  {
+    "state": "Kerala",
+    "source_name": "eGrantz Scholarship Kerala",
+    "url": "https://www.egrantz.kerala.gov.in",
+    "category": "education",
+    "tags": ["student", "scholarship", "kerala"]
+  },
+  {
+    "state": "Kerala",
+    "source_name": "Kerala Social Security Pension",
+    "url": "https://welfarepension.lsgkerala.gov.in",
+    "category": "empowerment",
+    "tags": ["senior citizen", "pension", "kerala"]
+  },
+  {
+    "state": "Ladakh",
+    "source_name": "Ladakh Administration Portal",
+    "url": "https://ladakh.nic.in",
+    "category": "other",
+    "tags": ["state portal", "citizen service", "ladakh"]
+  },
+  {
+    "state": "Lakshadweep",
+    "source_name": "Lakshadweep Administration Portal",
+    "url": "https://lakshadweep.gov.in",
+    "category": "other",
+    "tags": ["state portal", "citizen service", "lakshadweep"]
+  },
+  {
+    "state": "Madhya Pradesh",
+    "source_name": "MP e-Uparjan Agriculture Services",
+    "url": "https://mpeuparjan.nic.in",
+    "category": "financial",
+    "tags": ["farmer", "agriculture", "madhya pradesh"]
+  },
+  {
+    "state": "Madhya Pradesh",
+    "source_name": "MP Medhavi Scholarship",
+    "url": "https://medhavi.mp.gov.in",
+    "category": "education",
+    "tags": ["student", "scholarship", "madhya pradesh"]
+  },
+  {
+    "state": "Maharashtra",
+    "source_name": "MahaDBT Scholarship and Benefit Portal",
+    "url": "https://mahadbt.maharashtra.gov.in",
+    "category": "education",
+    "tags": ["student", "scholarship", "mahadbt", "state portal"]
+  },
+  {
+    "state": "Maharashtra",
+    "source_name": "Aaple Sarkar Citizen Services",
+    "url": "https://aaplesarkar.mahaonline.gov.in",
+    "category": "other",
+    "tags": ["citizen service", "state portal", "maharashtra"]
+  },
+  {
+    "state": "Maharashtra",
+    "source_name": "Maharashtra Krushi Department",
+    "url": "https://krishi.maharashtra.gov.in",
+    "category": "financial",
+    "tags": ["farmer", "agriculture", "subsidy", "maharashtra"]
+  },
+  {
+    "state": "Manipur",
+    "source_name": "Manipur Government Portal",
+    "url": "https://manipur.gov.in",
+    "category": "other",
+    "tags": ["state portal", "citizen service", "manipur"]
+  },
+  {
+    "state": "Meghalaya",
+    "source_name": "Meghalaya Government Portal",
+    "url": "https://meghalaya.gov.in",
+    "category": "other",
+    "tags": ["state portal", "citizen service", "meghalaya"]
+  },
+  {
+    "state": "Mizoram",
+    "source_name": "Mizoram Government Portal",
+    "url": "https://mizoram.gov.in",
+    "category": "other",
+    "tags": ["state portal", "citizen service", "mizoram"]
+  },
+  {
+    "state": "Nagaland",
+    "source_name": "Nagaland Government Portal",
+    "url": "https://nagaland.gov.in",
+    "category": "other",
+    "tags": ["state portal", "citizen service", "nagaland"]
+  },
+  {
+    "state": "Odisha",
+    "source_name": "Odisha Scholarship Portal",
+    "url": "https://scholarship.odisha.gov.in",
+    "category": "education",
+    "tags": ["student", "scholarship", "odisha"]
+  },
+  {
+    "state": "Odisha",
+    "source_name": "GO-SUGAM Odisha",
+    "url": "https://sugam.odisha.gov.in",
+    "category": "financial",
+    "tags": ["farmer", "subsidy", "odisha"]
+  },
+  {
+    "state": "Odisha",
+    "source_name": "SSEPD Odisha Social Security",
+    "url": "https://ssepd.odisha.gov.in",
+    "category": "empowerment",
+    "tags": ["social welfare", "pension", "disability", "odisha"]
+  },
+  {
+    "state": "Puducherry",
+    "source_name": "Puducherry Government Portal",
+    "url": "https://py.gov.in",
+    "category": "other",
+    "tags": ["state portal", "citizen service", "puducherry"]
+  },
+  {
+    "state": "Punjab",
+    "source_name": "Punjab e-Seva / Connect",
+    "url": "https://connect.punjab.gov.in",
+    "category": "other",
+    "tags": ["citizen service", "state portal", "punjab"]
+  },
+  {
+    "state": "Punjab",
+    "source_name": "Punjab Scholarship Portal",
+    "url": "https://scholarships.punjab.gov.in",
+    "category": "education",
+    "tags": ["student", "scholarship", "punjab"]
+  },
+  {
+    "state": "Rajasthan",
+    "source_name": "Rajasthan SSO Services",
+    "url": "https://sso.rajasthan.gov.in",
+    "category": "other",
+    "tags": ["citizen service", "state portal", "rajasthan"]
+  },
+  {
+    "state": "Rajasthan",
+    "source_name": "Rajasthan Social Justice Department",
+    "url": "https://sje.rajasthan.gov.in",
+    "category": "empowerment",
+    "tags": ["social welfare", "pension", "disability", "rajasthan"]
+  },
+  {
+    "state": "Sikkim",
+    "source_name": "Sikkim Government Portal",
+    "url": "https://sikkim.gov.in",
+    "category": "other",
+    "tags": ["state portal", "citizen service", "sikkim"]
+  },
+  {
+    "state": "Tamil Nadu",
+    "source_name": "Tamil Nadu e-Sevai Portal",
+    "url": "https://www.tnesevai.tn.gov.in",
+    "category": "other",
+    "tags": ["citizen service", "state portal", "tamil nadu"]
+  },
+  {
+    "state": "Tamil Nadu",
+    "source_name": "TN Scholarship Portal",
+    "url": "https://scholarship.tn.gov.in",
+    "category": "education",
+    "tags": ["student", "scholarship", "tamil nadu"]
+  },
+  {
+    "state": "Tamil Nadu",
+    "source_name": "Tamil Nadu Agriculture Department",
+    "url": "https://www.tnagrisnet.tn.gov.in",
+    "category": "financial",
+    "tags": ["farmer", "agriculture", "tamil nadu"]
+  },
+  {
+    "state": "Telangana",
+    "source_name": "Telangana ePASS",
+    "url": "https://telanganaepass.cgg.gov.in",
+    "category": "education",
+    "tags": ["student", "scholarship", "telangana"]
+  },
+  {
+    "state": "Telangana",
+    "source_name": "Telangana MeeSeva",
+    "url": "https://www.meeseva.telangana.gov.in",
+    "category": "other",
+    "tags": ["citizen service", "state portal", "telangana"]
+  },
+  {
+    "state": "Telangana",
+    "source_name": "Telangana State Portal",
+    "url": "https://www.telangana.gov.in",
+    "category": "other",
+    "tags": ["state portal", "telangana"]
+  },
+  {
+    "state": "Tripura",
+    "source_name": "Tripura e-District Services",
+    "url": "https://edistrict.tripura.gov.in",
+    "category": "other",
+    "tags": ["citizen service", "certificate", "tripura"]
+  },
+  {
+    "state": "Tripura",
+    "source_name": "Tripura Government Portal",
+    "url": "https://tripura.gov.in",
+    "category": "other",
+    "tags": ["state portal", "tripura"]
+  },
+  {
+    "state": "Uttar Pradesh",
+    "source_name": "UP Scholarship Portal",
+    "url": "https://scholarship.up.gov.in",
+    "category": "education",
+    "tags": ["student", "scholarship", "uttar pradesh"]
+  },
+  {
+    "state": "Uttar Pradesh",
+    "source_name": "UP Agriculture Department",
+    "url": "https://upagripardarshi.gov.in",
+    "category": "financial",
+    "tags": ["farmer", "agriculture", "uttar pradesh"]
+  },
+  {
+    "state": "Uttar Pradesh",
+    "source_name": "UP Social Pension",
+    "url": "https://sspy-up.gov.in",
+    "category": "empowerment",
+    "tags": ["pension", "social welfare", "uttar pradesh"]
+  },
+  {
+    "state": "Uttarakhand",
+    "source_name": "Uttarakhand e-District Services",
+    "url": "https://edistrict.uk.gov.in",
+    "category": "other",
+    "tags": ["citizen service", "certificate", "uttarakhand"]
+  },
+  {
+    "state": "Uttarakhand",
+    "source_name": "Uttarakhand Scholarship Portal",
+    "url": "https://escholarship.uk.gov.in",
+    "category": "education",
+    "tags": ["student", "scholarship", "uttarakhand"]
+  },
+  {
+    "state": "West Bengal",
+    "source_name": "Bangla Sahayata Kendra",
+    "url": "https://bsk.wb.gov.in",
+    "category": "other",
+    "tags": ["citizen service", "state portal", "west bengal"]
+  },
+  {
+    "state": "West Bengal",
+    "source_name": "SVMCM Scholarship West Bengal",
+    "url": "https://svmcm.wbhed.gov.in",
+    "category": "education",
+    "tags": ["student", "scholarship", "west bengal"]
+  },
+  {
+    "state": "West Bengal",
+    "source_name": "West Bengal Government Portal",
+    "url": "https://www.wb.gov.in",
+    "category": "other",
+    "tags": ["state portal", "west bengal"]
+  }
+]

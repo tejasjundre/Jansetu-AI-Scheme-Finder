@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ scheme.name }} | {{ t.brand_name }}{% endblock %}
+{% block body_class %}page-detail{% endblock %}
+
+{% block content %}
+<section class="detail-hero">
+  <div class="detail-hero-copy">
+    <span class="section-kicker">{{ t.scheme_details_kicker }}</span>
+    <h1>{{ scheme.name }}</h1>
+    <p class="lead-copy compact-copy">{{ detail.brief_description|default:scheme.description }}</p>
+
+    <div class="detail-summary-grid">
+      <article class="detail-summary-card">
+        <span class="panel-label">{{ t.detail_source_label }}</span>
+        <strong>{{ detail.nodal_ministry|default:scheme.official_source_name }}</strong>
+      </article>
+      <article class="detail-summary-card">
+        <span class="panel-label">{{ t.detail_coverage_label }}</span>
+        <strong>{% if detail.state_coverage %}{{ detail.state_coverage|join:", " }}{% else %}{{ scheme.state_coverage|default:"All India" }}{% endif %}</strong>
+      </article>
+      <article class="detail-summary-card">
+        <span class="panel-label">{{ t.detail_last_verified_label }}</span>
+        <strong>{{ scheme.last_verified_on|default:t.not_set }}</strong>
+      </article>
+    </div>
+
+    {% if detail.tags %}
+    <div class="reason-list">
+      {% for tag in detail.tags|slice:":5" %}
+      <span class="reason-chip">{{ tag|title }}</span>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+
+  <aside class="detail-apply-card">
+    <span class="section-kicker">{{ t.detail_apply_card_kicker }}</span>
+    <h2>{{ t.detail_apply_card_title }}</h2>
+    <p>{{ t.detail_apply_card_text }}</p>
+
+    <div class="detail-link-list">
+      {% for link in detail.quick_links %}
+      <a href="{{ link.url }}" target="_blank" rel="noopener noreferrer" class="btn btn-dark btn-pill detail-link-btn">{{ link.label }}</a>
+      {% empty %}
+      {% if scheme.url %}
+      <a href="{{ scheme.url }}" target="_blank" rel="noopener noreferrer" class="btn btn-dark btn-pill detail-link-btn">{{ t.open_official_page }}</a>
+      {% endif %}
+      {% endfor %}
+    </div>
+
+    <div class="detail-side-meta">
+      <p><strong>{{ t.detail_where_to_apply_label }}:</strong> {{ scheme.where_to_apply|default:t.detail_apply_fallback }}</p>
+      <p><strong>{{ t.detail_effort_level_label }}:</strong> {{ scheme.effort_level|title }}</p>
+      {% if detail.nodal_department %}
+      <p><strong>{{ t.detail_source_label }}:</strong> {{ detail.nodal_department }}</p>
+      {% endif %}
+    </div>
+
+    <form method="get" class="detail-help-form" data-help-center-form data-help-api-url="{% url 'help_center_api' %}">
+      <input type="hidden" name="lang" value="{{ current_lang }}">
+      <label class="field-block">
+        <span>Select state</span>
+        <select name="state" data-state-select="true">
+          <option value="">Select state</option>
+          {% for state in state_options %}
+          <option value="{{ state }}" {% if selected_state == state %}selected{% endif %}>{{ state }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label class="field-block">
+        <span>Select district</span>
+        <select name="district" data-district-select="true">
+          <option value="">{% if selected_district %}{{ selected_district }}{% else %}Select district{% endif %}</option>
+          {% if selected_district %}<option value="{{ selected_district }}" selected>{{ selected_district }}</option>{% endif %}
+        </select>
+      </label>
+      <button type="submit" class="btn btn-outline-dark btn-pill">Update help center</button>
+      <article class="help-center-card help-center-card-tight" data-help-center-preview>
+        <h3>{{ help_center.office_name }}</h3>
+        <p class="small-muted">{{ help_center.state }}{% if help_center.district %}, {{ help_center.district }}{% endif %}</p>
+        <p>{{ help_center.address }}</p>
+        <p><strong>Phone:</strong> {{ help_center.phone }}</p>
+        <p><strong>Hours:</strong> {{ help_center.hours }}</p>
+        {% if help_center.map_url %}
+        <a href="{{ help_center.map_url }}" target="_blank" rel="noopener noreferrer" class="text-link">Open on map</a>
+        {% endif %}
+      </article>
+    </form>
+  </aside>
+</section>
+
+<section class="split-grid detail-layout">
+  <article class="soft-card soft-card-strong">
+    <div class="scheme-head-row">
+      <span class="scheme-tag">{{ detail.scheme_level|default:"Official" }}</span>
+      <span class="badge-soft {% if scheme.verification_status == 'verified' %}badge-verified{% else %}badge-review{% endif %}">
+        {{ scheme.verification_status|title }}
+      </span>
+    </div>
+
+    <div class="detail-stack">
+      <div class="detail-block">
+        <span class="panel-label">{{ t.detail_eligibility_label }}</span>
+        <p>{{ detail.eligibility_text|default:scheme.eligibility }}</p>
+      </div>
+
+      {% if detail.benefits %}
+      <div class="detail-block">
+        <span class="panel-label">{{ t.detail_benefits_label }}</span>
+        <p>{{ detail.benefits }}</p>
+      </div>
+      {% endif %}
+
+      {% if detail.application_steps %}
+      <div class="detail-block">
+        <span class="panel-label">{{ t.detail_apply_label }}</span>
+        <ol class="plain-steps">
+          {% for step in detail.application_steps|slice:":8" %}
+          <li>{{ step }}</li>
+          {% endfor %}
+        </ol>
+      </div>
+      {% endif %}
+    </div>
+  </article>
+
+  <article class="soft-card detail-secondary-card">
+    <span class="section-kicker">{{ t.quick_links_kicker }}</span>
+    <h2>{{ t.quick_links_title }}</h2>
+    <ul class="plain-steps detail-reference-list">
+      {% for link in detail.quick_links %}
+      <li><a href="{{ link.url }}" target="_blank" rel="noopener noreferrer" class="text-link">{{ link.label }}</a></li>
+      {% empty %}
+      <li>{{ t.open_official_page }}</li>
+      {% endfor %}
+    </ul>
+  </article>
+</section>
+
+<section class="content-section split-grid">
+  <article class="soft-card">
+    <span class="section-kicker">{{ t.detail_documents_kicker }}</span>
+    <h2>{{ t.detail_documents_title }}</h2>
+    <ul class="plain-steps">
+      {% for item in detail.documents %}
+      <li>{{ item }}</li>
+      {% empty %}
+      <li>{{ t.detail_documents_fallback }}</li>
+      {% endfor %}
+    </ul>
+  </article>
+
+  <article class="soft-card">
+    <span class="section-kicker">{{ t.detail_faq_kicker }}</span>
+    <h2>{{ t.detail_faq_title }}</h2>
+    <ul class="plain-steps">
+      {% for item in detail.faqs %}
+      <li><strong>{{ item.question }}</strong> {{ item.answer_md|default:"" }}</li>
+      {% empty %}
+      <li>{{ t.detail_faq_fallback }}</li>
+      {% endfor %}
+    </ul>
+  </article>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+{{ district_map|json_script:"districtData" }}
+<script src="{% static 'js/location.js' %}"></script>
+<script src="{% static 'js/help_center.js' %}"></script>
+{% endblock %}

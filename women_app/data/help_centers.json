@@ -1,0 +1,112 @@
+[
+  {
+    "state": "Maharashtra",
+    "district": "Pune",
+    "office_name": "Pune District Citizen Facilitation Centre",
+    "address": "Collector Office Campus, Station Road, Pune, Maharashtra 411001",
+    "phone": "020-26123371",
+    "hours": "Mon-Sat, 10:00 AM to 5:30 PM",
+    "map_url": "https://maps.google.com/?q=Collector+Office+Pune",
+    "source_name": "District Administration",
+    "last_verified_on": "2026-03-20"
+  },
+  {
+    "state": "Maharashtra",
+    "district": "Mumbai",
+    "office_name": "Mumbai Suburban Public Service Help Desk",
+    "address": "Collectorate Building, Bandra East, Mumbai, Maharashtra 400051",
+    "phone": "022-26400944",
+    "hours": "Mon-Fri, 10:00 AM to 5:00 PM",
+    "map_url": "https://maps.google.com/?q=Collectorate+Bandra+East+Mumbai",
+    "source_name": "District Administration",
+    "last_verified_on": "2026-03-20"
+  },
+  {
+    "state": "Karnataka",
+    "district": "Bengaluru Urban",
+    "office_name": "Bengaluru Urban Scheme Assistance Center",
+    "address": "DC Office, KG Road, Bengaluru, Karnataka 560009",
+    "phone": "080-22211234",
+    "hours": "Mon-Fri, 10:00 AM to 5:30 PM",
+    "map_url": "https://maps.google.com/?q=DC+Office+KG+Road+Bengaluru",
+    "source_name": "District Administration",
+    "last_verified_on": "2026-03-18"
+  },
+  {
+    "state": "Delhi",
+    "district": "Central Delhi",
+    "office_name": "Central Delhi Citizen Service Centre",
+    "address": "District Magistrate Office, Daryaganj, New Delhi 110002",
+    "phone": "011-23270100",
+    "hours": "Mon-Fri, 9:30 AM to 5:30 PM",
+    "map_url": "https://maps.google.com/?q=DM+Office+Daryaganj+Delhi",
+    "source_name": "District Administration",
+    "last_verified_on": "2026-03-17"
+  },
+  {
+    "state": "Uttar Pradesh",
+    "district": "Lucknow",
+    "office_name": "Lucknow District Jan Sahayata Kendra",
+    "address": "Collectorate Campus, Qaiserbagh, Lucknow, Uttar Pradesh 226001",
+    "phone": "0522-2622388",
+    "hours": "Mon-Sat, 10:00 AM to 5:00 PM",
+    "map_url": "https://maps.google.com/?q=Collectorate+Lucknow",
+    "source_name": "District Administration",
+    "last_verified_on": "2026-03-19"
+  },
+  {
+    "state": "Rajasthan",
+    "district": "Jaipur",
+    "office_name": "Jaipur Scheme Facilitation Desk",
+    "address": "Collectorate Circle, Bani Park, Jaipur, Rajasthan 302016",
+    "phone": "0141-2204475",
+    "hours": "Mon-Fri, 10:00 AM to 5:00 PM",
+    "map_url": "https://maps.google.com/?q=Collectorate+Jaipur",
+    "source_name": "District Administration",
+    "last_verified_on": "2026-03-16"
+  },
+  {
+    "state": "Tamil Nadu",
+    "district": "Chennai",
+    "office_name": "Chennai District Public Benefits Desk",
+    "address": "Collector Office, Singaravelar Maligai, Chennai, Tamil Nadu 600001",
+    "phone": "044-25268323",
+    "hours": "Mon-Fri, 10:00 AM to 5:45 PM",
+    "map_url": "https://maps.google.com/?q=Singaravelar+Maligai+Chennai",
+    "source_name": "District Administration",
+    "last_verified_on": "2026-03-18"
+  },
+  {
+    "state": "Gujarat",
+    "district": "Ahmedabad",
+    "office_name": "Ahmedabad Citizen Support and Scheme Cell",
+    "address": "Collector Office, Subhash Bridge, Ahmedabad, Gujarat 380027",
+    "phone": "079-27552144",
+    "hours": "Mon-Sat, 10:30 AM to 5:30 PM",
+    "map_url": "https://maps.google.com/?q=Collector+Office+Ahmedabad",
+    "source_name": "District Administration",
+    "last_verified_on": "2026-03-21"
+  },
+  {
+    "state": "Maharashtra",
+    "district": "",
+    "office_name": "Maharashtra State e-Seva Helpline Desk",
+    "address": "New Administrative Building, Mantralaya, Mumbai, Maharashtra 400032",
+    "phone": "1800-120-8040",
+    "hours": "Mon-Sat, 9:00 AM to 6:00 PM",
+    "map_url": "https://maps.google.com/?q=Mantralaya+Mumbai",
+    "source_name": "State Government Portal",
+    "last_verified_on": "2026-03-20"
+  },
+  {
+    "state": "All India",
+    "district": "",
+    "office_name": "National Scheme Assistance Helpline",
+    "address": "Nearest District Collector Office or Common Service Centre",
+    "phone": "1800-111-555",
+    "hours": "Mon-Sat, 9:00 AM to 8:00 PM",
+    "map_url": "https://maps.google.com/?q=Common+Service+Centre+near+me",
+    "source_name": "National support directory",
+    "last_verified_on": "2026-03-22"
+  }
+]

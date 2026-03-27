@@ -1,0 +1,122 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="{{ current_lang }}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#eef3ff">
+  <title>{% block title %}{{ t.brand_name }}{% endblock %}</title>
+  <meta name="description" content="{{ t.meta_description }}">
+  <link rel="icon" type="image/png" href="{% static 'img/jan_setu_logo.png' %}">
+  <link rel="apple-touch-icon" href="{% static 'img/jan_setu_logo.png' %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/main.css' %}">
+  <link rel="stylesheet" href="{% static 'css/premium.css' %}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}" data-lang="{{ current_lang }}" data-theme="light">
+  <a class="skip-link" href="#mainContent">Skip to content</a>
+
+  <div class="site-bg layer-1"></div>
+  <div class="site-bg layer-2"></div>
+  <div class="site-bg layer-3"></div>
+  <div class="ambient-glow ambient-glow-a"></div>
+  <div class="ambient-glow ambient-glow-b"></div>
+  <div class="ambient-glow ambient-glow-c"></div>
+  <div class="ambient-noise"></div>
+
+  <div class="page-shell">
+    <header class="site-header premium-header">
+      <div class="container header-row">
+        <a class="brand-mark" href="{% url 'home' %}" aria-label="{{ t.brand_name }}">
+          <img
+            class="brand-logo"
+            src="{% static 'img/jan_setu_logo.png' %}"
+            alt="{{ t.brand_name }} logo"
+            width="676"
+            height="369"
+            decoding="async"
+            loading="eager"
+          >
+          <span class="brand-text">
+            <strong>{{ t.brand_name }}</strong>
+            <small>{{ t.brand_tagline }}</small>
+          </span>
+        </a>
+
+        <button
+          type="button"
+          class="ghost-btn nav-toggle"
+          id="navToggle"
+          aria-expanded="false"
+          aria-controls="headerPanel"
+        >
+          Menu
+        </button>
+
+        <div class="header-panel" id="headerPanel">
+          <nav class="site-nav" id="siteNav">
+            <a href="{% url 'wizard' %}?lang={{ current_lang }}">{{ t.nav_wizard }}</a>
+            <a href="{% url 'chat' %}?lang={{ current_lang }}">{{ t.nav_chat }}</a>
+            <a href="{% url 'schemes' %}?lang={{ current_lang }}">{{ t.nav_schemes }}</a>
+            <a href="{% url 'support' %}?lang={{ current_lang }}">{{ t.nav_support }}</a>
+            {% if request.user.is_staff %}
+            <a href="{% url 'ops_dashboard' %}?lang={{ current_lang }}">Ops</a>
+            {% endif %}
+          </nav>
+
+          <div class="header-tools">
+            <label class="language-pill">
+              <span>{{ t.lang_label }}</span>
+              <select id="languageSwitcher" aria-label="{{ t.lang_label }}">
+                {% for code, label in languages.items %}
+                <option value="{{ code }}" {% if code == current_lang %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+            </label>
+            <button type="button" class="ghost-btn theme-btn" id="themeToggle" data-theme-toggle aria-label="Toggle color theme">
+              Theme
+            </button>
+            <button type="button" class="ghost-btn comfort-btn" data-comfort-toggle>A+</button>
+            <a href="{% url 'wizard' %}?lang={{ current_lang }}" class="btn btn-dark btn-pill nav-cta">{{ t.hero_primary }}</a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="container page-content" id="mainContent">
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+
+  <footer class="site-footer premium-footer">
+    <div class="container footer-row">
+      <div class="footer-copy">
+        <img
+          class="footer-logo"
+          src="{% static 'img/jan_setu_logo.png' %}"
+          alt="{{ t.brand_name }} logo"
+          width="676"
+          height="369"
+          decoding="async"
+          loading="lazy"
+        >
+        <div class="footer-copy-text">
+          <strong>{{ t.brand_name }}</strong>
+          <span>{{ t.footer_line }}</span>
+        </div>
+      </div>
+      <div class="footer-links">
+        <a href="{% url 'privacy' %}?lang={{ current_lang }}">{{ t.nav_privacy }}</a>
+        <a href="/admin/">Admin</a>
+      </div>
+    </div>
+  </footer>
+
+  {{ t|json_script:"uiStrings" }}
+  <script src="{% static 'js/site.js' %}"></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

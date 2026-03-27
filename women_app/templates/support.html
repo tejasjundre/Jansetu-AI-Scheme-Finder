@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ t.support_title }} | {{ t.brand_name }}{% endblock %}
+{% block body_class %}page-support{% endblock %}
+
+{% block content %}
+<section class="page-hero premium-hero compact">
+  <span class="section-kicker">{{ t.support_title }}</span>
+  <h1>{{ t.support_heading }}</h1>
+  <p class="lead-copy compact-copy">{{ t.support_subtitle }}</p>
+</section>
+
+<section class="support-layout premium-support-layout">
+  <form method="post" class="support-form" data-help-center-form data-help-api-url="{% url 'help_center_api' %}">
+    {% csrf_token %}
+    {{ support_form.preferred_language }}
+    <div class="form-grid two">
+      <label class="field-block">
+        <span>{{ support_form.name.label }}</span>
+        {{ support_form.name }}
+      </label>
+      <label class="field-block">
+        <span>{{ support_form.phone_number.label }}</span>
+        {{ support_form.phone_number }}
+      </label>
+      <label class="field-block">
+        <span>{{ support_form.email.label }}</span>
+        {{ support_form.email }}
+      </label>
+      <label class="field-block">
+        <span>{{ support_form.support_type.label }}</span>
+        {{ support_form.support_type }}
+      </label>
+      <label class="field-block">
+        <span>{{ support_form.state.label }}</span>
+        {{ support_form.state }}
+      </label>
+      <label class="field-block">
+        <span>{{ support_form.district.label }}</span>
+        {{ support_form.district }}
+      </label>
+    </div>
+
+    <label class="field-block mt-3">
+      <span>{{ support_form.message.label }}</span>
+      {{ support_form.message }}
+    </label>
+
+    <div class="wizard-actions">
+      <button type="submit" class="btn btn-dark btn-pill">{{ t.support_submit }}</button>
+    </div>
+
+    {% if submitted %}
+    <div class="success-banner">{{ t.support_success }}</div>
+    {% endif %}
+  </form>
+
+  <aside class="wizard-sidecard">
+    <span class="section-kicker">{{ t.support_reasons_kicker }}</span>
+    <h2>{{ t.support_reasons_title }}</h2>
+    <ul class="plain-steps">
+      {% for item in support_reasons %}
+      <li>{{ item }}</li>
+      {% endfor %}
+    </ul>
+    <div class="help-center-card" data-help-center-preview>
+      <h3>{{ help_center.office_name }}</h3>
+      <p class="small-muted">{{ help_center.state }}{% if help_center.district %}, {{ help_center.district }}{% endif %}</p>
+      <p>{{ help_center.address }}</p>
+      <p><strong>Phone:</strong> {{ help_center.phone }}</p>
+      <p><strong>Hours:</strong> {{ help_center.hours }}</p>
+      {% if help_center.map_url %}
+      <a href="{{ help_center.map_url }}" target="_blank" rel="noopener noreferrer" class="text-link">Open on map</a>
+      {% endif %}
+    </div>
+  </aside>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+{{ district_map|json_script:"districtData" }}
+<script src="{% static 'js/location.js' %}"></script>
+<script src="{% static 'js/help_center.js' %}"></script>
+{% endblock %}

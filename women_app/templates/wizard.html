@@ -1,0 +1,309 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ t.wizard_title }} | {{ t.brand_name }}{% endblock %}
+{% block body_class %}page-wizard{% endblock %}
+
+{% block content %}
+<section class="page-hero premium-hero compact">
+  <span class="section-kicker">{{ t.wizard_title }}</span>
+  <h1>{{ t.wizard_heading }}</h1>
+  <p class="lead-copy compact-copy">{{ t.wizard_subtitle }}</p>
+  <div class="trust-ribbon">
+    <span class="promise-chip">{{ t.wizard_promise_1 }}</span>
+    <span class="promise-chip">{{ t.wizard_promise_2 }}</span>
+    <span class="promise-chip">{{ t.wizard_promise_3 }}</span>
+  </div>
+</section>
+
+<section class="wizard-layout premium-wizard-layout">
+  <form
+    method="post"
+    class="wizard-form premium-form-panel"
+    id="wizardForm"
+    data-initial-step="{{ initial_wizard_step|default:1 }}"
+    data-help-center-form
+    data-help-api-url="{% url 'help_center_api' %}"
+  >
+    {% csrf_token %}
+    {{ wizard_form.language }}
+    {{ wizard_form.support_need }}
+
+    <div class="wizard-progress-shell">
+      <div class="wizard-progress-copy">
+        <span class="panel-label">{{ t.wizard_title }}</span>
+        <strong id="wizardCurrentStepLabel">{{ t.wizard_step_1 }}</strong>
+        <p>Move one step at a time. Large choices and simple fields keep the journey easy to finish.</p>
+      </div>
+      <div class="wizard-progress-track" aria-hidden="true">
+        <span class="wizard-progress-fill" id="wizardProgressFill"></span>
+      </div>
+      <div class="wizard-steps">
+        <button type="button" class="step-chip{% if initial_wizard_step == 1 %} active{% endif %}" data-step-trigger="1" data-step-label="{{ t.wizard_step_1 }}">
+          <span>01</span>
+          <small>{{ t.wizard_step_1 }}</small>
+        </button>
+        <button type="button" class="step-chip{% if initial_wizard_step == 2 %} active{% endif %}" data-step-trigger="2" data-step-label="{{ t.wizard_step_2 }}">
+          <span>02</span>
+          <small>{{ t.wizard_step_2 }}</small>
+        </button>
+        <button type="button" class="step-chip{% if initial_wizard_step == 3 %} active{% endif %}" data-step-trigger="3" data-step-label="{{ t.wizard_step_3 }}">
+          <span>03</span>
+          <small>{{ t.wizard_step_3 }}</small>
+        </button>
+      </div>
+    </div>
+
+    <div class="wizard-step{% if initial_wizard_step == 1 %} active{% endif %}" data-step="1">
+      <div class="wizard-step-card">
+        <div class="wizard-step-head">
+          <div>
+            <span class="section-kicker">{{ t.wizard_step_1 }}</span>
+            <h2>{{ t.wizard_focus_title }}</h2>
+          </div>
+          <p>{{ t.wizard_focus_help }}</p>
+        </div>
+
+        <div class="wizard-focus-panel">
+          <div class="need-focus-grid" data-focus-group>
+            {% for item in need_focus_options %}
+            <label class="need-focus-card{% if wizard_form.need_focus.value == item.value %} is-selected{% endif %}" data-focus-card>
+              <input
+                type="radio"
+                name="{{ wizard_form.need_focus.html_name }}"
+                value="{{ item.value }}"
+                {% if wizard_form.need_focus.value == item.value %}checked{% endif %}
+                data-focus-radio
+              >
+              <span class="need-focus-index">{{ forloop.counter|stringformat:"02d" }}</span>
+              <span class="need-focus-copy">
+                <strong>{{ item.label }}</strong>
+                <small>{{ item.hint }}</small>
+              </span>
+            </label>
+            {% endfor %}
+          </div>
+          <small class="field-error{% if not wizard_form.need_focus.errors %} d-none{% endif %}" data-focus-error>
+            {% if wizard_form.need_focus.errors %}{{ wizard_form.need_focus.errors.0 }}{% else %}{{ t.select_need_focus }}{% endif %}
+          </small>
+        </div>
+
+        <div class="form-grid two wizard-form-grid">
+          <label class="field-block">
+            <span>{{ wizard_form.age.label }}</span>
+            {{ wizard_form.age }}
+            {% if wizard_form.age.errors %}<small class="field-error">{{ wizard_form.age.errors.0 }}</small>{% endif %}
+          </label>
+          <label class="field-block">
+            <span>{{ wizard_form.state.label }}</span>
+            {{ wizard_form.state }}
+            {% if wizard_form.state.errors %}<small class="field-error">{{ wizard_form.state.errors.0 }}</small>{% endif %}
+          </label>
+          <label class="field-block">
+            <span>{{ wizard_form.district.label }}</span>
+            {{ wizard_form.district }}
+            {% if wizard_form.district.errors %}<small class="field-error">{{ wizard_form.district.errors.0 }}</small>{% endif %}
+          </label>
+          <label class="field-block">
+            <span>{{ wizard_form.income_band.label }}</span>
+            {{ wizard_form.income_band }}
+            {% if wizard_form.income_band.errors %}<small class="field-error">{{ wizard_form.income_band.errors.0 }}</small>{% endif %}
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="wizard-step{% if initial_wizard_step == 2 %} active{% endif %}" data-step="2">
+      <div class="wizard-step-card">
+        <div class="wizard-step-head">
+          <div>
+            <span class="section-kicker">{{ t.wizard_step_2 }}</span>
+            <h2>Tell us who needs support</h2>
+          </div>
+          <p>Use broad details only. The platform uses these signals to raise better scheme matches.</p>
+        </div>
+
+        <div class="form-grid two wizard-form-grid">
+          <label class="field-block">
+            <span>{{ wizard_form.gender.label }}</span>
+            {{ wizard_form.gender }}
+            {% if wizard_form.gender.errors %}<small class="field-error">{{ wizard_form.gender.errors.0 }}</small>{% endif %}
+          </label>
+          <label class="field-block">
+            <span>{{ wizard_form.residence_type.label }}</span>
+            {{ wizard_form.residence_type }}
+            {% if wizard_form.residence_type.errors %}<small class="field-error">{{ wizard_form.residence_type.errors.0 }}</small>{% endif %}
+          </label>
+        </div>
+
+        <div class="toggle-grid premium-toggle-grid">
+          <label class="field-toggle">{{ wizard_form.is_student }} <span>{{ wizard_form.is_student.label }}</span></label>
+          <label class="field-toggle">{{ wizard_form.is_mother }} <span>{{ wizard_form.is_mother.label }}</span></label>
+          <label class="field-toggle">{{ wizard_form.is_entrepreneur }} <span>{{ wizard_form.is_entrepreneur.label }}</span></label>
+          <label class="field-toggle">{{ wizard_form.has_disability }} <span>{{ wizard_form.has_disability.label }}</span></label>
+        </div>
+      </div>
+    </div>
+
+    <div class="wizard-step{% if initial_wizard_step == 3 %} active{% endif %}" data-step="3">
+      <div class="wizard-step-card">
+        <div class="wizard-step-head">
+          <div>
+            <span class="section-kicker">{{ t.wizard_step_3 }}</span>
+            <h2>Final checks before we match</h2>
+          </div>
+          <p>This helps JanSetu recommend realistic next steps, especially when documents are missing.</p>
+        </div>
+
+        <div class="form-grid two wizard-form-grid">
+          <label class="field-block">
+            <span>{{ wizard_form.annual_income.label }}</span>
+            {{ wizard_form.annual_income }}
+            {% if wizard_form.annual_income.errors %}<small class="field-error">{{ wizard_form.annual_income.errors.0 }}</small>{% endif %}
+          </label>
+          <label class="field-block">
+            <span>{{ wizard_form.caste_category.label }}</span>
+            {{ wizard_form.caste_category }}
+            {% if wizard_form.caste_category.errors %}<small class="field-error">{{ wizard_form.caste_category.errors.0 }}</small>{% endif %}
+          </label>
+          <label class="field-block">
+            <span>{{ wizard_form.document_readiness.label }}</span>
+            {{ wizard_form.document_readiness }}
+            {% if wizard_form.document_readiness.errors %}<small class="field-error">{{ wizard_form.document_readiness.errors.0 }}</small>{% endif %}
+          </label>
+        </div>
+
+        <label class="field-block mt-3">
+          <span>{{ wizard_form.notes.label }}</span>
+          {{ wizard_form.notes }}
+          {% if wizard_form.notes.errors %}<small class="field-error">{{ wizard_form.notes.errors.0 }}</small>{% endif %}
+        </label>
+      </div>
+    </div>
+
+    <div class="wizard-actions premium-actions">
+      <button type="button" class="btn btn-outline-dark btn-pill" id="wizardBack">{{ t.previous }}</button>
+      <button type="button" class="btn btn-outline-dark btn-pill" id="wizardNext">{{ t.next }}</button>
+      <button type="submit" class="btn btn-dark btn-pill d-none" id="wizardSubmit">{{ t.wizard_submit }}</button>
+    </div>
+  </form>
+
+  <aside class="wizard-sidecard premium-side-panel">
+    <span class="section-kicker">{{ t.wizard_side_kicker }}</span>
+    <h2>{{ t.wizard_side_title }}</h2>
+    <ul class="plain-steps polished-list">
+      {% for item in wizard_tips %}
+      <li>{{ item }}</li>
+      {% endfor %}
+    </ul>
+
+    <div class="help-center-card" data-help-center-preview>
+      <h3>{{ help_center.office_name }}</h3>
+      <p class="small-muted">{{ help_center.state }}{% if help_center.district %}, {{ help_center.district }}{% endif %}</p>
+      <p>{{ help_center.address }}</p>
+      <p><strong>Phone:</strong> {{ help_center.phone }}</p>
+      <p><strong>Hours:</strong> {{ help_center.hours }}</p>
+      {% if help_center.map_url %}
+      <a href="{{ help_center.map_url }}" target="_blank" rel="noopener noreferrer" class="text-link">Open on map</a>
+      {% endif %}
+    </div>
+
+    <div class="side-cta-stack">
+      <a href="{% url 'chat' %}?lang={{ current_lang }}" class="btn btn-outline-dark btn-pill sidecard-cta">{{ t.use_voice_chat }}</a>
+      <a href="{% url 'support' %}?lang={{ current_lang }}" class="text-link">{{ t.support_request_link }}</a>
+    </div>
+  </aside>
+</section>
+
+{% if assessment %}
+<section class="section-block results-stage">
+  <div class="section-heading">
+    <span class="section-kicker">{{ t.wizard_result_title }}</span>
+    <h2>{{ assessment.recommendation_count }} {{ t.matches_found }}</h2>
+    <p class="section-copy">Each card below gives a quick fit signal, official source path, and the next best action.</p>
+  </div>
+
+  {% if recommendations %}
+  <div class="scheme-grid premium-scheme-grid">
+    {% for scheme in recommendations %}
+    <article class="scheme-card premium-scheme-card result-card">
+      <div class="scheme-card-top">
+        <div class="scheme-head-row">
+          <span class="scheme-tag">{{ scheme.category_label }}</span>
+          <span class="match-score-badge">{{ scheme.match_score_percent }}% fit</span>
+        </div>
+        <h3>{{ scheme.name }}</h3>
+        <p>{{ scheme.description }}</p>
+      </div>
+
+      <div class="reason-list">
+        {% for reason in scheme.match_reasons %}
+        <span class="reason-chip">{{ reason }}</span>
+        {% endfor %}
+      </div>
+
+      <div class="result-snapshot-grid">
+        <article class="snapshot-tile">
+          <span class="panel-label">{{ t.next_step_label }}</span>
+          <p>{{ scheme.next_steps.where_to_apply }}</p>
+        </article>
+        <article class="snapshot-tile">
+          <span class="panel-label">{{ t.effort_label }}</span>
+          <p>{{ scheme.next_steps.effort_label }} / {{ scheme.next_steps.effort_estimate }}</p>
+        </article>
+      </div>
+
+      {% if scheme.next_steps.support_hint %}
+      <p class="warning-text">{{ scheme.next_steps.support_hint }}</p>
+      {% endif %}
+
+      <details class="detail-disclosure">
+        <summary>{{ t.documents_label }} and next steps</summary>
+        <div class="detail-disclosure-body">
+          <div class="result-detail">
+            <strong>{{ t.documents_label }}</strong>
+            <ul class="plain-steps">
+              {% for item in scheme.next_steps.documents %}
+              <li>{{ item }}</li>
+              {% empty %}
+              <li>{{ t.documents_fallback }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+          <div class="result-detail">
+            <strong>{{ t.next_step_label }}</strong>
+            <p>{{ scheme.next_steps.offline_location }}</p>
+            <p><strong>Helpline:</strong> {{ scheme.next_steps.helpline }}</p>
+          </div>
+        </div>
+      </details>
+
+      <div class="result-actions">
+        {% if scheme.slug %}
+        <a href="{% url 'scheme_detail' scheme.slug %}?lang={{ current_lang }}" class="btn btn-dark btn-pill">{{ t.chat_open_details }}</a>
+        {% elif scheme.url %}
+        <a href="{{ scheme.url }}" target="_blank" rel="noopener noreferrer" class="btn btn-dark btn-pill">{{ t.open_official_page }}</a>
+        {% endif %}
+        <button type="button" class="btn btn-outline-dark btn-pill speak-block" data-speak="{{ scheme.name }}. {{ scheme.next_steps.where_to_apply }}">
+          {{ t.voice_read }}
+        </button>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-panel">
+    <h3>{{ t.wizard_empty }}</h3>
+    <a href="{% url 'support' %}?lang={{ current_lang }}" class="btn btn-dark btn-pill">{{ t.nav_support }}</a>
+  </div>
+  {% endif %}
+</section>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+{{ district_map|json_script:"districtData" }}
+<script src="{% static 'js/location.js' %}"></script>
+<script src="{% static 'js/help_center.js' %}"></script>
+<script src="{% static 'js/wizard.js' %}"></script>
+{% endblock %}

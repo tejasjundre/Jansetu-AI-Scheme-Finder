@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 320" role="img" aria-label="India coverage placeholder">
+  <defs>
+    <linearGradient id="g2" x1="0%" x2="100%" y1="0%" y2="100%">
+      <stop offset="0%" stop-color="#ecfeff" />
+      <stop offset="100%" stop-color="#dbeafe" />
+    </linearGradient>
+  </defs>
+  <rect width="420" height="320" fill="url(#g2)" />
+  <g fill="#93c5fd" stroke="#2563eb" stroke-width="3">
+    <path d="M174 44l42 8 14 28 24 12 6 24-20 14 10 26-18 26-28 10-18 30-20 10-20-8-8-18-22-12-4-20-18-20 12-18-8-20 18-26 18-8 12-22 28-14z" />
+  </g>
+  <text x="210" y="286" text-anchor="middle" font-size="24" font-family="Arial, sans-serif" fill="#1d4ed8">India Coverage</text>
+</svg>

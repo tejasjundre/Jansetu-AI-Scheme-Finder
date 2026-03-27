@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+.pytest_cache/
+.mypy_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Django / local runtime
+db.sqlite3
+*.sqlite3
+staticfiles/
+media/
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Logs and temporary runtime files
+*.log
+logs/
+*.out.log
+*.err.log
+
+# Backups and generated exports
+backups/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+

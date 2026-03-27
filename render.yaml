@@ -1,0 +1,31 @@
+services:
+  - type: web
+    name: jansetu-ai-sakhi
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput
+    startCommand: python manage.py migrate --noinput && gunicorn ai_sakhi.wsgi:application --bind 0.0.0.0:$PORT --workers 3 --timeout 120
+    healthCheckPath: /healthz/
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: DEBUG
+        value: "False"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: jansetu-db
+          property: connectionString
+      - key: ALLOWED_HOSTS
+        value: jansetu-ai-sakhi.onrender.com
+      - key: CSRF_TRUSTED_ORIGINS
+        value: https://jansetu-ai-sakhi.onrender.com
+      - key: RATE_LIMIT_ENABLED
+        value: "True"
+
+databases:
+  - name: jansetu-db
+    plan: free
+
