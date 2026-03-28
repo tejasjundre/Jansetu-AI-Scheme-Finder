@@ -8,6 +8,13 @@
   <span class="section-kicker">{{ t.schemes_title }}</span>
   <h1>{{ t.schemes_heading }}</h1>
   <p class="lead-copy compact-copy">{{ t.schemes_subtitle }}</p>
+  {% if personalized_mode %}
+  <div class="trust-ribbon">
+    <span class="promise-chip">Personalized mode active</span>
+    <span class="promise-chip">Based on your saved profile</span>
+    <a href="{% url 'citizen_profile' %}?lang={{ current_lang }}" class="text-link">Edit profile</a>
+  </div>
+  {% endif %}
 </section>
 
 <section class="stats-grid compact-stats premium-stats-grid">

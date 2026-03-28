@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}Login | {{ t.brand_name }}{% endblock %}
+{% block body_class %}page-auth{% endblock %}
+
+{% block content %}
+<section class="page-hero premium-hero compact">
+  <span class="section-kicker">Citizen Access</span>
+  <h1>Login to your scheme account</h1>
+  <p class="lead-copy compact-copy">Use your profile to see only the most relevant schemes like a MahaDBT-style journey.</p>
+</section>
+
+<section class="premium-wizard-layout">
+  <form method="post" class="premium-form-panel auth-panel">
+    {% csrf_token %}
+    {% if next_url %}<input type="hidden" name="next" value="{{ next_url }}">{% endif %}
+
+    <div class="wizard-step-head">
+      <div>
+        <span class="section-kicker">Sign in</span>
+        <h2>Welcome back</h2>
+      </div>
+      <p>Login and continue from your saved citizen profile.</p>
+    </div>
+
+    {% if login_form.non_field_errors %}
+    <div class="field-error-block">
+      {{ login_form.non_field_errors }}
+    </div>
+    {% endif %}
+
+    <div class="form-grid wizard-form-grid">
+      <label class="field-block">
+        <span>{{ login_form.username.label }}</span>
+        {{ login_form.username }}
+        {% if login_form.username.errors %}<small class="field-error">{{ login_form.username.errors.0 }}</small>{% endif %}
+      </label>
+      <label class="field-block">
+        <span>{{ login_form.password.label }}</span>
+        {{ login_form.password }}
+        {% if login_form.password.errors %}<small class="field-error">{{ login_form.password.errors.0 }}</small>{% endif %}
+      </label>
+    </div>
+
+    <div class="wizard-actions premium-actions">
+      <button type="submit" class="btn btn-dark btn-pill">Login</button>
+      <a href="{% url 'citizen_register' %}?lang={{ current_lang }}" class="btn btn-outline-dark btn-pill">Create account</a>
+    </div>
+  </form>
+
+  <aside class="premium-side-panel auth-side-panel">
+    <span class="section-kicker">Why login?</span>
+    <h2>Personalized recommendations</h2>
+    <ul class="plain-steps polished-list">
+      <li>Save your state, district, and profile details once.</li>
+      <li>See relevant schemes first instead of generic listings.</li>
+      <li>Track your application next steps in one place.</li>
+    </ul>
+  </aside>
+</section>
+{% endblock %}
+

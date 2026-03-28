@@ -6,6 +6,11 @@ from . import views
 urlpatterns = [
     path("healthz/", views.healthz, name="healthz"),
     path("", views.home, name="home"),
+    path("register/", views.citizen_register, name="citizen_register"),
+    path("login/", views.citizen_login, name="citizen_login"),
+    path("logout/", views.citizen_logout, name="citizen_logout"),
+    path("dashboard/", views.citizen_dashboard, name="citizen_dashboard"),
+    path("profile/", views.citizen_profile, name="citizen_profile"),
     path("wizard/", views.wizard, name="wizard"),
     path("chat/", views.chat, name="chat"),
     path("schemes/", views.schemes, name="schemes"),

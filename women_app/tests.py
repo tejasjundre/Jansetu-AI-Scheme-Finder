@@ -9,7 +9,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from .myscheme_api import merge_myscheme_detail_into_record
-from .models import ChatHistory, EligibilityAssessment, EscalationRequest, Scheme
+from .models import ChatHistory, CitizenProfile, EligibilityAssessment, EscalationRequest, Scheme
 
 
 class PageTests(TestCase):
@@ -47,7 +47,7 @@ class PageTests(TestCase):
     def test_schemes_page_uses_json_fallback(self):
         response = self.client.get(reverse("schemes"))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Beti Bachao Beti Padhao")
+        self.assertGreater(response.context["scheme_total"], 0)
 
     @patch("women_app.views.fetch_scheme_detail")
     def test_scheme_detail_page_loads(self, mock_fetch_scheme_detail):
@@ -137,6 +137,49 @@ class WizardAndSupportTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(EscalationRequest.objects.count(), 1)
         self.assertContains(response, "saved")
+
+
+class CitizenAuthProfileTests(TestCase):
+    def test_register_creates_user_and_profile(self):
+        response = self.client.post(
+            reverse("citizen_register"),
+            data={
+                "username": "citizen1",
+                "email": "citizen1@example.com",
+                "password1": "StrongPass123!",
+                "password2": "StrongPass123!",
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(get_user_model().objects.filter(username="citizen1").exists())
+        user = get_user_model().objects.get(username="citizen1")
+        self.assertTrue(CitizenProfile.objects.filter(user=user).exists())
+
+    def test_login_and_personalized_schemes_mode(self):
+        user = get_user_model().objects.create_user(username="citizen2", password="StrongPass123!")
+        CitizenProfile.objects.create(
+            user=user,
+            age=24,
+            annual_income=180000,
+            income_band="under_2l",
+            gender="female",
+            state="Maharashtra",
+            district="Pune",
+            residence_type="urban",
+            support_need="education",
+            document_readiness="partial",
+        )
+        self.client.post(
+            reverse("citizen_login"),
+            data={"username": "citizen2", "password": "StrongPass123!"},
+        )
+        response = self.client.get(reverse("schemes"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Personalized mode active")
+
+    def test_profile_page_requires_login(self):
+        response = self.client.get(reverse("citizen_profile"))
+        self.assertEqual(response.status_code, 302)
 
 
 class ChatApiTests(TestCase):

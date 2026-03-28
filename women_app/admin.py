@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import AuditLog, ChatHistory, EligibilityAssessment, EscalationRequest, Scheme
+from .models import AuditLog, ChatHistory, CitizenProfile, EligibilityAssessment, EscalationRequest, Scheme
 
 
 admin.site.site_header = "JanSetu Admin"
@@ -81,6 +81,21 @@ class EscalationRequestAdmin(admin.ModelAdmin):
         ("Request", {"fields": ("name", "phone_number", "email", "preferred_language", "support_type", "state", "district", "message")}),
         ("Workflow", {"fields": ("status", "assigned_to", "due_at", "resolution_notes", "status_updated_at", "created_at")}),
     )
+
+
+@admin.register(CitizenProfile)
+class CitizenProfileAdmin(admin.ModelAdmin):
+    list_display = (
+        "user",
+        "state",
+        "district",
+        "support_need",
+        "income_band",
+        "updated_at",
+    )
+    list_filter = ("support_need", "income_band", "state", "updated_at")
+    search_fields = ("user__username", "user__email", "state", "district")
+    readonly_fields = ("created_at", "updated_at")
 
 
 @admin.register(AuditLog)

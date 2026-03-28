@@ -271,3 +271,76 @@ class AuditLog(models.Model):
 
     def __str__(self):
         return f"{self.method} {self.path}"
+
+
+class CitizenProfile(models.Model):
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="citizen_profile",
+    )
+    language = models.CharField(max_length=10, default="en")
+    age = models.PositiveIntegerField(null=True, blank=True)
+    annual_income = models.PositiveIntegerField(null=True, blank=True)
+    income_band = models.CharField(
+        max_length=30,
+        choices=EligibilityAssessment.INCOME_BAND_CHOICES,
+        default="under_5l",
+    )
+    gender = models.CharField(
+        max_length=10,
+        choices=EligibilityAssessment.GENDER_CHOICES,
+        default="any",
+    )
+    state = models.CharField(max_length=100, blank=True)
+    district = models.CharField(max_length=100, blank=True)
+    residence_type = models.CharField(
+        max_length=20,
+        choices=EligibilityAssessment.RESIDENCE_CHOICES,
+        default="urban",
+    )
+    support_need = models.CharField(max_length=50, default="other")
+    is_student = models.BooleanField(default=False)
+    is_mother = models.BooleanField(default=False)
+    is_entrepreneur = models.BooleanField(default=False)
+    has_disability = models.BooleanField(default=False)
+    caste_category = models.CharField(
+        max_length=20,
+        choices=EligibilityAssessment.CASTE_CHOICES,
+        default="general",
+    )
+    document_readiness = models.CharField(
+        max_length=20,
+        choices=EligibilityAssessment.DOCUMENT_CHOICES,
+        default="partial",
+    )
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-updated_at"]
+        verbose_name = "Citizen Profile"
+        verbose_name_plural = "Citizen Profiles"
+
+    def __str__(self):
+        return f"{self.user.username} profile"
+
+    def to_recommendation_input(self):
+        return {
+            "age": self.age,
+            "annual_income": self.annual_income,
+            "income_band": self.income_band,
+            "gender": self.gender,
+            "state": self.state,
+            "district": self.district,
+            "residence_type": self.residence_type,
+            "support_need": self.support_need,
+            "is_student": self.is_student,
+            "is_mother": self.is_mother,
+            "is_entrepreneur": self.is_entrepreneur,
+            "has_disability": self.has_disability,
+            "caste_category": self.caste_category,
+            "document_readiness": self.document_readiness,
+            "notes": self.notes,
+        }

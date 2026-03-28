@@ -1,9 +1,10 @@
 from django import forms
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib.auth import get_user_model
 
 from .localization import get_content_list, get_field_choices, get_field_labels, get_ui_strings
 from .location_data import canonical_state_name, get_district_choices, get_state_choices
-from .models import EligibilityAssessment, EscalationRequest
+from .models import CitizenProfile, EligibilityAssessment, EscalationRequest
 
 
 INDIA_STATES = get_state_choices()
@@ -199,3 +200,70 @@ class EscalationOpsUpdateForm(forms.ModelForm):
         self.fields["assigned_to"].queryset = user_model.objects.filter(is_staff=True, is_active=True).order_by("username")
         self.fields["assigned_to"].required = False
         self.fields["resolution_notes"].required = False
+
+
+class CitizenRegisterForm(UserCreationForm):
+    email = forms.EmailField(required=False)
+
+    class Meta:
+        model = get_user_model()
+        fields = ["username", "email", "password1", "password2"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["username"].widget.attrs.update({"placeholder": "Choose username"})
+        self.fields["email"].widget.attrs.update({"placeholder": "Email (optional)"})
+        self.fields["password1"].widget.attrs.update({"placeholder": "Create password"})
+        self.fields["password2"].widget.attrs.update({"placeholder": "Confirm password"})
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.email = self.cleaned_data.get("email", "").strip()
+        if commit:
+            user.save()
+        return user
+
+
+class CitizenLoginForm(AuthenticationForm):
+    username = forms.CharField(widget=forms.TextInput(attrs={"placeholder": "Username"}))
+    password = forms.CharField(widget=forms.PasswordInput(attrs={"placeholder": "Password"}))
+
+
+class CitizenProfileForm(LocalizedDistrictFormMixin, forms.ModelForm):
+    state = forms.ChoiceField(choices=())
+    district = forms.ChoiceField(required=False, choices=())
+
+    class Meta:
+        model = CitizenProfile
+        fields = [
+            "language",
+            "age",
+            "annual_income",
+            "income_band",
+            "gender",
+            "state",
+            "district",
+            "residence_type",
+            "support_need",
+            "is_student",
+            "is_mother",
+            "is_entrepreneur",
+            "has_disability",
+            "caste_category",
+            "document_readiness",
+            "notes",
+        ]
+        widgets = {
+            "language": forms.HiddenInput(),
+            "notes": forms.Textarea(attrs={"rows": 4}),
+        }
+
+    def __init__(self, *args, lang: str = "en", **kwargs):
+        super().__init__(*args, **kwargs)
+        self._localize_common_fields(lang)
+        self.fields["support_need"].choices = get_field_choices("support_need", lang)
+        self.fields["income_band"].choices = get_field_choices("income_band", lang)
+        self.fields["gender"].choices = get_field_choices("gender", lang)
+        self.fields["residence_type"].choices = get_field_choices("residence_type", lang)
+        self.fields["caste_category"].choices = get_field_choices("caste_category", lang)
+        self.fields["document_readiness"].choices = get_field_choices("document_readiness", lang)

@@ -4,14 +4,17 @@ from collections import Counter
 from datetime import timedelta
 
 from django.contrib.admin.views.decorators import staff_member_required
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, login as auth_login, logout as auth_logout
+from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
 from django.db import connection
 from django.db.utils import DatabaseError, OperationalError
 from django.utils import timezone
+from django.utils.http import url_has_allowed_host_and_scheme
+from django.urls import reverse
 from django.core.paginator import Paginator
 from django.http import HttpResponse, JsonResponse
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.http import require_GET, require_POST
 
@@ -23,11 +26,19 @@ from .eligibility import (
     get_all_schemes,
     recommend_schemes_from_profile,
 )
-from .forms import EscalationRequestForm, EligibilityWizardForm, INDIA_STATES, EscalationOpsUpdateForm
+from .forms import (
+    CitizenLoginForm,
+    CitizenProfileForm,
+    CitizenRegisterForm,
+    EscalationOpsUpdateForm,
+    EscalationRequestForm,
+    EligibilityWizardForm,
+    INDIA_STATES,
+)
 from .help_centers import find_help_centers, get_best_help_center
 from .localization import SUPPORTED_LANGUAGES, get_content_list, get_ui_strings
 from .location_data import get_state_district_map
-from .models import AuditLog, ChatHistory, EligibilityAssessment, EscalationRequest, Scheme
+from .models import AuditLog, ChatHistory, CitizenProfile, EligibilityAssessment, EscalationRequest, Scheme
 from .myscheme_api import fetch_scheme_detail
 from .news_feed import get_launch_news
 from .voice_utils import synthesize_speech_mp3, transcribe_audio_upload
@@ -65,6 +76,17 @@ def _serialize_chat_scheme(scheme):
         "where_to_apply": scheme["next_steps"]["where_to_apply"] if scheme.get("next_steps") else "",
         "helpline": scheme["next_steps"]["helpline"] if scheme.get("next_steps") else "",
     }
+
+
+def _get_or_create_citizen_profile(user, lang):
+    profile, _ = CitizenProfile.objects.get_or_create(
+        user=user,
+        defaults={"language": lang},
+    )
+    if not profile.language:
+        profile.language = lang
+        profile.save(update_fields=["language"])
+    return profile
 
 
 def healthz(request):
@@ -167,6 +189,109 @@ def home(request):
 
 
 @ensure_csrf_cookie
+def citizen_register(request):
+    lang = get_current_language(request)
+    if request.user.is_authenticated:
+        return redirect(f"{reverse('citizen_dashboard')}?lang={lang}")
+
+    form = CitizenRegisterForm(request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        user = form.save()
+        auth_login(request, user)
+        _get_or_create_citizen_profile(user, lang)
+        return redirect(f"{reverse('citizen_profile')}?lang={lang}&welcome=1")
+
+    return render(
+        request,
+        "citizen_register.html",
+        build_context(request, {"register_form": form}),
+    )
+
+
+@ensure_csrf_cookie
+def citizen_login(request):
+    lang = get_current_language(request)
+    if request.user.is_authenticated:
+        return redirect(f"{reverse('citizen_dashboard')}?lang={lang}")
+
+    next_url = request.POST.get("next") or request.GET.get("next") or ""
+    form = CitizenLoginForm(request, data=request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        user = form.get_user()
+        auth_login(request, user)
+        _get_or_create_citizen_profile(user, lang)
+        if next_url and url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):
+            return redirect(next_url)
+        return redirect(f"{reverse('citizen_dashboard')}?lang={lang}")
+
+    return render(
+        request,
+        "citizen_login.html",
+        build_context(request, {"login_form": form, "next_url": next_url}),
+    )
+
+
+def citizen_logout(request):
+    lang = get_current_language(request)
+    auth_logout(request)
+    return redirect(f"{reverse('home')}?lang={lang}")
+
+
+@ensure_csrf_cookie
+@login_required(login_url="/login/")
+def citizen_profile(request):
+    lang = get_current_language(request)
+    profile = _get_or_create_citizen_profile(request.user, lang)
+    success = False
+
+    if request.method == "POST":
+        form = CitizenProfileForm(request.POST, instance=profile, lang=lang)
+        if form.is_valid():
+            updated = form.save(commit=False)
+            updated.user = request.user
+            updated.language = lang
+            updated.save()
+            success = True
+    else:
+        form = CitizenProfileForm(instance=profile, lang=lang, initial={"language": profile.language or lang})
+
+    return render(
+        request,
+        "citizen_profile.html",
+        build_context(
+            request,
+            {
+                "profile_form": form,
+                "profile_saved": success,
+                "need_focus_options": get_content_list("need_focus_options", lang),
+            },
+        ),
+    )
+
+
+@login_required(login_url="/login/")
+def citizen_dashboard(request):
+    lang = get_current_language(request)
+    profile = _get_or_create_citizen_profile(request.user, lang)
+    profile_data = profile.to_recommendation_input()
+    recommendations = recommend_schemes_from_profile(profile_data, limit=12)
+    profile_incomplete = not profile.state or not profile.support_need or profile.age is None
+
+    return render(
+        request,
+        "citizen_dashboard.html",
+        build_context(
+            request,
+            {
+                "profile": profile,
+                "profile_incomplete": profile_incomplete,
+                "recommendations": recommendations,
+            },
+        ),
+    )
+
+
+@ensure_csrf_cookie
 def wizard(request):
     lang = get_current_language(request)
     initial_wizard_step = 1
@@ -246,7 +371,17 @@ def schemes(request):
     category = request.GET.get("category", "").strip() or None
     state = request.GET.get("state", "").strip() or None
     sort = request.GET.get("sort", "recommended").strip() or "recommended"
-    scheme_records = filter_schemes(query=query, category=category, state=state, sort=sort)
+    personalized_mode = False
+    profile = None
+    if request.user.is_authenticated:
+        profile = getattr(request.user, "citizen_profile", None)
+
+    if profile and not query and not category and not state and sort == "recommended":
+        scheme_records = recommend_schemes_from_profile(profile.to_recommendation_input(), limit=240)
+        personalized_mode = True
+    else:
+        scheme_records = filter_schemes(query=query, category=category, state=state, sort=sort)
+
     paginator = Paginator(scheme_records, 24)
     page_obj = paginator.get_page(request.GET.get("page") or 1)
     return render(
@@ -264,6 +399,7 @@ def schemes(request):
                 "selected_sort": sort,
                 "state_options": [state for state, _ in INDIA_STATES if state != "All India"],
                 "scheme_total": paginator.count,
+                "personalized_mode": personalized_mode,
             },
         ),
     )

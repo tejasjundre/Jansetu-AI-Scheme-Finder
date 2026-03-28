@@ -58,6 +58,10 @@
 
         <div class="header-panel" id="headerPanel">
           <nav class="site-nav" id="siteNav">
+            {% if request.user.is_authenticated %}
+            <a href="{% url 'citizen_dashboard' %}?lang={{ current_lang }}">My Dashboard</a>
+            <a href="{% url 'citizen_profile' %}?lang={{ current_lang }}">My Profile</a>
+            {% endif %}
             <a href="{% url 'wizard' %}?lang={{ current_lang }}">{{ t.nav_wizard }}</a>
             <a href="{% url 'chat' %}?lang={{ current_lang }}">{{ t.nav_chat }}</a>
             <a href="{% url 'schemes' %}?lang={{ current_lang }}">{{ t.nav_schemes }}</a>
@@ -80,7 +84,13 @@
               Theme
             </button>
             <button type="button" class="ghost-btn comfort-btn" data-comfort-toggle>A+</button>
-            <a href="{% url 'wizard' %}?lang={{ current_lang }}" class="btn btn-dark btn-pill nav-cta">{{ t.hero_primary }}</a>
+            {% if request.user.is_authenticated %}
+            <span class="user-pill">{{ request.user.username }}</span>
+            <a href="{% url 'citizen_logout' %}?lang={{ current_lang }}" class="btn btn-outline-dark btn-pill nav-cta">Logout</a>
+            {% else %}
+            <a href="{% url 'citizen_login' %}?lang={{ current_lang }}" class="btn btn-outline-dark btn-pill nav-cta">Login</a>
+            <a href="{% url 'citizen_register' %}?lang={{ current_lang }}" class="btn btn-dark btn-pill nav-cta">Create account</a>
+            {% endif %}
           </div>
         </div>
       </div>

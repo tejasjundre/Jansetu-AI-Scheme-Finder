@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Account | {{ t.brand_name }}{% endblock %}
+{% block body_class %}page-auth{% endblock %}
+
+{% block content %}
+<section class="page-hero premium-hero compact">
+  <span class="section-kicker">Citizen Onboarding</span>
+  <h1>Create your JanSetu account</h1>
+  <p class="lead-copy compact-copy">Register once, complete your profile, and get targeted schemes every time.</p>
+</section>
+
+<section class="premium-wizard-layout">
+  <form method="post" class="premium-form-panel auth-panel">
+    {% csrf_token %}
+
+    <div class="wizard-step-head">
+      <div>
+        <span class="section-kicker">Register</span>
+        <h2>Start your profile</h2>
+      </div>
+      <p>This creates your secure citizen login.</p>
+    </div>
+
+    {% if register_form.non_field_errors %}
+    <div class="field-error-block">
+      {{ register_form.non_field_errors }}
+    </div>
+    {% endif %}
+
+    <div class="form-grid wizard-form-grid">
+      <label class="field-block">
+        <span>{{ register_form.username.label }}</span>
+        {{ register_form.username }}
+        {% if register_form.username.errors %}<small class="field-error">{{ register_form.username.errors.0 }}</small>{% endif %}
+      </label>
+      <label class="field-block">
+        <span>{{ register_form.email.label }}</span>
+        {{ register_form.email }}
+        {% if register_form.email.errors %}<small class="field-error">{{ register_form.email.errors.0 }}</small>{% endif %}
+      </label>
+      <label class="field-block">
+        <span>{{ register_form.password1.label }}</span>
+        {{ register_form.password1 }}
+        {% if register_form.password1.errors %}<small class="field-error">{{ register_form.password1.errors.0 }}</small>{% endif %}
+      </label>
+      <label class="field-block">
+        <span>{{ register_form.password2.label }}</span>
+        {{ register_form.password2 }}
+        {% if register_form.password2.errors %}<small class="field-error">{{ register_form.password2.errors.0 }}</small>{% endif %}
+      </label>
+    </div>
+
+    <div class="wizard-actions premium-actions">
+      <button type="submit" class="btn btn-dark btn-pill">Create account</button>
+      <a href="{% url 'citizen_login' %}?lang={{ current_lang }}" class="btn btn-outline-dark btn-pill">Already have login?</a>
+    </div>
+  </form>
+
+  <aside class="premium-side-panel auth-side-panel">
+    <span class="section-kicker">After registration</span>
+    <h2>Complete profile once</h2>
+    <ul class="plain-steps polished-list">
+      <li>Set your district and support need.</li>
+      <li>Save age and income band for eligibility matching.</li>
+      <li>Open your dashboard for priority schemes.</li>
+    </ul>
+  </aside>
+</section>
+{% endblock %}
+
