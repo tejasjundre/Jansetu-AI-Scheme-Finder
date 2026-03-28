@@ -15,7 +15,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (themeToggle) {
       themeToggle.classList.toggle("active-ghost", normalized === "dark");
-      themeToggle.textContent = normalized === "dark" ? "Light" : "Dark";
+      const nextLabel = normalized === "dark" ? "Switch to light theme" : "Switch to dark theme";
+      const labelNode = themeToggle.querySelector("[data-theme-label]");
+      if (labelNode) {
+        labelNode.textContent = nextLabel;
+      }
+      themeToggle.setAttribute("aria-label", nextLabel);
+      themeToggle.setAttribute("title", nextLabel);
     }
 
     if (themeMeta) {
