@@ -4,85 +4,119 @@
 {% block body_class %}page-dashboard{% endblock %}
 
 {% block content %}
-<section class="page-hero premium-hero compact">
-  <span class="section-kicker">My Dashboard</span>
-  <h1>Personalized schemes for {{ request.user.username }}</h1>
-  <p class="lead-copy compact-copy">This list is generated from your saved citizen profile, similar to a MahaDBT user dashboard.</p>
-</section>
+<section class="account-shell">
+  <aside class="premium-side-panel account-sidebar">
+    <span class="section-kicker">Applicant Panel</span>
+    <h2>{{ request.user.username }}</h2>
+    <p class="small-muted">Applicant ID: JS-{{ request.user.id|stringformat:"05d" }}</p>
 
-{% if profile_incomplete %}
-<section class="section-block">
-  <div class="empty-panel">
-    <h3>Complete profile for better results</h3>
-    <p>Your profile is missing key fields (age/state/support need). Update it to get sharper recommendations.</p>
-    <a href="{% url 'citizen_profile' %}?lang={{ current_lang }}" class="btn btn-dark btn-pill">Update profile</a>
-  </div>
-</section>
-{% endif %}
+    <nav class="account-nav-list">
+      <a class="account-nav-item is-active" href="{% url 'citizen_dashboard' %}?lang={{ current_lang }}">My Dashboard</a>
+      <a class="account-nav-item" href="{% url 'citizen_profile' %}?lang={{ current_lang }}">Update Profile</a>
+      <a class="account-nav-item" href="{% url 'schemes' %}?lang={{ current_lang }}">All Schemes</a>
+      <a class="account-nav-item" href="{% url 'support' %}?lang={{ current_lang }}">Help Desk</a>
+    </nav>
 
-<section class="stats-grid compact-stats premium-stats-grid">
-  <article class="stat-card premium-stat-card">
-    <span class="panel-label">State</span>
-    <strong>{{ profile.state|default:"Not set" }}</strong>
-  </article>
-  <article class="stat-card premium-stat-card">
-    <span class="panel-label">District</span>
-    <strong>{{ profile.district|default:"Not set" }}</strong>
-  </article>
-  <article class="stat-card premium-stat-card">
-    <span class="panel-label">Need category</span>
-    <strong>{{ profile.support_need|title }}</strong>
-  </article>
-  <article class="stat-card premium-stat-card">
-    <span class="panel-label">Matches shown</span>
-    <strong>{{ recommendations|length }}</strong>
-  </article>
-</section>
+    <div class="account-side-card">
+      <strong>Profile summary</strong>
+      <p><span>State:</span> {{ profile.state|default:"Not set" }}</p>
+      <p><span>District:</span> {{ profile.district|default:"Not set" }}</p>
+      <p><span>Main need:</span> {{ profile.support_need|title }}</p>
+    </div>
 
-<section class="scheme-grid premium-scheme-grid">
-  {% for scheme in recommendations %}
-  <article class="scheme-card premium-scheme-card">
-    <div class="scheme-card-top">
-      <div class="scheme-head-row">
-        <span class="scheme-tag">{{ scheme.category_label }}</span>
-        <span class="match-score-badge">{{ scheme.match_score_percent }}% fit</span>
+    <a href="{% url 'citizen_logout' %}?lang={{ current_lang }}" class="btn btn-outline-dark btn-pill">Logout</a>
+  </aside>
+
+  <div class="account-main">
+    <section class="premium-panel account-header-panel">
+      <div>
+        <span class="section-kicker">My Dashboard</span>
+        <h1>Recommended schemes for your profile</h1>
       </div>
-      <h3>{{ scheme.name }}</h3>
-      <p>{{ scheme.description }}</p>
-    </div>
+      <div class="account-header-actions">
+        <a href="{% url 'citizen_profile' %}?lang={{ current_lang }}" class="btn btn-outline-dark btn-pill">Edit profile</a>
+        <a href="{% url 'wizard' %}?lang={{ current_lang }}" class="btn btn-dark btn-pill">Run guided check</a>
+      </div>
+    </section>
 
-    <div class="reason-list">
-      {% for reason in scheme.match_reasons %}
-      <span class="reason-chip">{{ reason }}</span>
-      {% endfor %}
-    </div>
+    {% if profile_incomplete %}
+    <section class="section-block">
+      <div class="empty-panel">
+        <h3>Complete profile for better results</h3>
+        <p>Your profile is missing key fields. Update age, state, district, and support need for sharper matches.</p>
+        <a href="{% url 'citizen_profile' %}?lang={{ current_lang }}" class="btn btn-dark btn-pill">Update profile now</a>
+      </div>
+    </section>
+    {% endif %}
 
-    <div class="result-snapshot-grid">
-      <article class="snapshot-tile">
-        <span class="panel-label">Next step</span>
-        <p>{{ scheme.next_steps.where_to_apply }}</p>
+    <section class="stats-grid compact-stats premium-stats-grid">
+      <article class="stat-card premium-stat-card">
+        <span class="panel-label">State</span>
+        <strong>{{ profile.state|default:"Not set" }}</strong>
       </article>
-      <article class="snapshot-tile">
-        <span class="panel-label">Effort</span>
-        <p>{{ scheme.next_steps.effort_label }} / {{ scheme.next_steps.effort_estimate }}</p>
+      <article class="stat-card premium-stat-card">
+        <span class="panel-label">District</span>
+        <strong>{{ profile.district|default:"Not set" }}</strong>
       </article>
-    </div>
+      <article class="stat-card premium-stat-card">
+        <span class="panel-label">Need category</span>
+        <strong>{{ profile.support_need|title }}</strong>
+      </article>
+      <article class="stat-card premium-stat-card">
+        <span class="panel-label">Matches shown</span>
+        <strong>{{ recommendations|length }}</strong>
+      </article>
+    </section>
 
-    <div class="result-actions">
-      {% if scheme.slug %}
-      <a href="{% url 'scheme_detail' scheme.slug %}?lang={{ current_lang }}" class="btn btn-dark btn-pill">{{ t.chat_open_details }}</a>
-      {% elif scheme.url %}
-      <a href="{{ scheme.url }}" target="_blank" rel="noopener noreferrer" class="btn btn-dark btn-pill">{{ t.open_official_page }}</a>
-      {% endif %}
-      <a href="{% url 'citizen_profile' %}?lang={{ current_lang }}" class="btn btn-outline-dark btn-pill">Edit profile</a>
-    </div>
-  </article>
-  {% empty %}
-  <div class="empty-panel">
-    <h3>No personalized matches yet</h3>
-    <p>Update your profile and try again.</p>
+    <section class="premium-panel account-results-panel">
+      <div class="account-results-head">
+        <h2>Relevant schemes</h2>
+        <p>Only schemes matched against your saved profile are listed first.</p>
+      </div>
+
+      <div class="account-scheme-list">
+        {% for scheme in recommendations %}
+        <article class="account-scheme-row">
+          <div class="account-scheme-main">
+            <div class="account-scheme-head">
+              <span class="scheme-tag">{{ scheme.category_label }}</span>
+              <span class="match-score-badge">{{ scheme.match_score_percent }}% fit</span>
+            </div>
+            <h3>{{ scheme.name }}</h3>
+            <p>{{ scheme.description }}</p>
+            <div class="reason-list">
+              {% for reason in scheme.match_reasons %}
+              <span class="reason-chip">{{ reason }}</span>
+              {% endfor %}
+            </div>
+          </div>
+
+          <div class="account-scheme-side">
+            <div class="snapshot-tile">
+              <span class="panel-label">Next step</span>
+              <p>{{ scheme.next_steps.where_to_apply }}</p>
+            </div>
+            <div class="snapshot-tile">
+              <span class="panel-label">Effort</span>
+              <p>{{ scheme.next_steps.effort_label }} / {{ scheme.next_steps.effort_estimate }}</p>
+            </div>
+            <div class="account-scheme-actions">
+              {% if scheme.slug %}
+              <a href="{% url 'scheme_detail' scheme.slug %}?lang={{ current_lang }}" class="btn btn-dark btn-pill">{{ t.chat_open_details }}</a>
+              {% elif scheme.url %}
+              <a href="{{ scheme.url }}" target="_blank" rel="noopener noreferrer" class="btn btn-dark btn-pill">{{ t.open_official_page }}</a>
+              {% endif %}
+            </div>
+          </div>
+        </article>
+        {% empty %}
+        <div class="empty-panel">
+          <h3>No personalized matches yet</h3>
+          <p>Update your profile and try again.</p>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
   </div>
-  {% endfor %}
 </section>
 {% endblock %}
-

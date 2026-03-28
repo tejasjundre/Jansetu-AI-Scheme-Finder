@@ -377,6 +377,173 @@ a {
     font-weight: 600;
 }
 
+.account-shell {
+    display: grid;
+    grid-template-columns: minmax(240px, 300px) minmax(0, 1fr);
+    gap: 1rem;
+    align-items: start;
+}
+
+.account-sidebar {
+    position: sticky;
+    top: 104px;
+    display: grid;
+    gap: 0.9rem;
+}
+
+.account-nav-list {
+    display: grid;
+    gap: 0.45rem;
+}
+
+.account-nav-item {
+    display: block;
+    border: 1px solid color-mix(in srgb, var(--line-2) 72%, white);
+    background: color-mix(in srgb, var(--canvas-1) 88%, white);
+    border-radius: 14px;
+    padding: 0.62rem 0.85rem;
+    font-weight: 700;
+    color: var(--ink-2);
+}
+
+.account-nav-item:hover,
+.account-nav-item:focus-visible {
+    border-color: var(--line-1);
+    color: var(--ink-1);
+    transform: translateY(-1px);
+}
+
+.account-nav-item.is-active {
+    color: #ffffff;
+    border-color: transparent;
+    background: linear-gradient(135deg, var(--brand-1), var(--brand-2));
+    box-shadow: 0 14px 24px rgba(79, 70, 229, 0.22);
+}
+
+.account-side-card {
+    display: grid;
+    gap: 0.4rem;
+    border: 1px solid color-mix(in srgb, var(--line-2) 72%, white);
+    background: color-mix(in srgb, var(--canvas-1) 88%, white);
+    border-radius: 16px;
+    padding: 0.85rem;
+}
+
+.account-side-card p {
+    margin: 0;
+    color: var(--ink-2);
+    line-height: 1.45;
+}
+
+.account-side-card span {
+    color: var(--ink-1);
+    font-weight: 700;
+}
+
+.account-main {
+    display: grid;
+    gap: 1rem;
+}
+
+.account-header-panel {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.2rem 1.3rem;
+}
+
+.account-header-panel h1 {
+    margin: 0.15rem 0 0;
+    font-size: clamp(1.6rem, 3.2vw, 2.25rem);
+    letter-spacing: -0.05em;
+}
+
+.account-header-actions {
+    display: flex;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.account-results-panel {
+    padding: 1rem;
+}
+
+.account-results-head {
+    display: grid;
+    gap: 0.35rem;
+    padding: 0.4rem 0.3rem 0.9rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--line-2) 70%, transparent);
+}
+
+.account-results-head h2 {
+    margin: 0;
+    letter-spacing: -0.04em;
+}
+
+.account-results-head p {
+    margin: 0;
+    color: var(--ink-2);
+}
+
+.account-scheme-list {
+    display: grid;
+    gap: 0.85rem;
+    padding-top: 0.9rem;
+}
+
+.account-scheme-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(250px, 320px);
+    gap: 0.85rem;
+    border: 1px solid color-mix(in srgb, var(--line-2) 72%, white);
+    background: color-mix(in srgb, var(--canvas-1) 88%, white);
+    border-radius: 20px;
+    padding: 0.9rem;
+}
+
+.account-scheme-main h3 {
+    margin: 0.35rem 0 0.32rem;
+    font-size: 1.08rem;
+    letter-spacing: -0.03em;
+}
+
+.account-scheme-main p {
+    margin: 0;
+    color: var(--ink-2);
+    line-height: 1.6;
+}
+
+.account-scheme-head {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.account-scheme-side {
+    display: grid;
+    gap: 0.55rem;
+    align-content: start;
+}
+
+.account-scheme-actions {
+    display: grid;
+}
+
+.account-profile-form {
+    display: grid;
+    gap: 1rem;
+}
+
+.account-form-section {
+    border: 1px solid color-mix(in srgb, var(--line-2) 72%, white);
+    background: color-mix(in srgb, var(--canvas-1) 88%, white);
+    border-radius: 22px;
+    padding: 1rem;
+}
+
 .section-kicker {
     border: 1px solid rgba(99, 102, 241, 0.14);
     background: color-mix(in srgb, var(--brand-soft) 85%, white);
@@ -1600,6 +1767,7 @@ main > section:nth-child(4) {
     .premium-wizard-layout,
     .premium-chat-layout,
     .premium-support-layout,
+    .account-shell,
     .spotlight-grid,
     .split-grid,
     .detail-hero,
@@ -1661,6 +1829,23 @@ main > section:nth-child(4) {
 
     .brand-text small {
         display: none;
+    }
+
+    .account-sidebar {
+        position: static;
+    }
+
+    .account-header-panel,
+    .account-header-actions {
+        display: grid;
+    }
+
+    .account-header-actions {
+        justify-content: stretch;
+    }
+
+    .account-scheme-row {
+        grid-template-columns: 1fr;
     }
 }
 

@@ -4,99 +4,139 @@
 {% block body_class %}page-profile{% endblock %}
 
 {% block content %}
-<section class="page-hero premium-hero compact">
-  <span class="section-kicker">Citizen Profile</span>
-  <h1>Complete your profile for accurate matching</h1>
-  <p class="lead-copy compact-copy">This profile powers your personalized scheme recommendations.</p>
-</section>
+<section class="account-shell">
+  <aside class="premium-side-panel account-sidebar">
+    <span class="section-kicker">Applicant Panel</span>
+    <h2>{{ request.user.username }}</h2>
+    <p class="small-muted">Applicant ID: JS-{{ request.user.id|stringformat:"05d" }}</p>
 
-<section class="premium-wizard-layout">
-  <form method="post" class="premium-form-panel">
-    {% csrf_token %}
-    {{ profile_form.language }}
+    <nav class="account-nav-list">
+      <a class="account-nav-item" href="{% url 'citizen_dashboard' %}?lang={{ current_lang }}">My Dashboard</a>
+      <a class="account-nav-item is-active" href="{% url 'citizen_profile' %}?lang={{ current_lang }}">Update Profile</a>
+      <a class="account-nav-item" href="{% url 'schemes' %}?lang={{ current_lang }}">All Schemes</a>
+      <a class="account-nav-item" href="{% url 'support' %}?lang={{ current_lang }}">Help Desk</a>
+    </nav>
 
-    <div class="wizard-step-head">
-      <div>
-        <span class="section-kicker">Profile details</span>
-        <h2>Your eligibility inputs</h2>
-      </div>
-      <p>Keep these details up to date so your dashboard stays relevant.</p>
+    <div class="account-side-card">
+      <strong>Profile checklist</strong>
+      <p>1. Age + income</p>
+      <p>2. State + district</p>
+      <p>3. Main support need</p>
+      <p>4. Document readiness</p>
     </div>
-
-    {% if profile_saved %}
-    <div class="success-banner">Profile updated successfully.</div>
-    {% endif %}
-
-    <div class="form-grid two wizard-form-grid">
-      <label class="field-block">
-        <span>{{ profile_form.age.label }}</span>
-        {{ profile_form.age }}
-      </label>
-      <label class="field-block">
-        <span>{{ profile_form.annual_income.label }}</span>
-        {{ profile_form.annual_income }}
-      </label>
-      <label class="field-block">
-        <span>{{ profile_form.income_band.label }}</span>
-        {{ profile_form.income_band }}
-      </label>
-      <label class="field-block">
-        <span>{{ profile_form.gender.label }}</span>
-        {{ profile_form.gender }}
-      </label>
-      <label class="field-block">
-        <span>{{ profile_form.state.label }}</span>
-        {{ profile_form.state }}
-      </label>
-      <label class="field-block">
-        <span>{{ profile_form.district.label }}</span>
-        {{ profile_form.district }}
-      </label>
-      <label class="field-block">
-        <span>{{ profile_form.residence_type.label }}</span>
-        {{ profile_form.residence_type }}
-      </label>
-      <label class="field-block">
-        <span>{{ profile_form.support_need.label }}</span>
-        {{ profile_form.support_need }}
-      </label>
-      <label class="field-block">
-        <span>{{ profile_form.caste_category.label }}</span>
-        {{ profile_form.caste_category }}
-      </label>
-      <label class="field-block">
-        <span>{{ profile_form.document_readiness.label }}</span>
-        {{ profile_form.document_readiness }}
-      </label>
-    </div>
-
-    <div class="toggle-grid premium-toggle-grid">
-      <label class="field-toggle">{{ profile_form.is_student }} <span>{{ profile_form.is_student.label }}</span></label>
-      <label class="field-toggle">{{ profile_form.is_mother }} <span>{{ profile_form.is_mother.label }}</span></label>
-      <label class="field-toggle">{{ profile_form.is_entrepreneur }} <span>{{ profile_form.is_entrepreneur.label }}</span></label>
-      <label class="field-toggle">{{ profile_form.has_disability }} <span>{{ profile_form.has_disability.label }}</span></label>
-    </div>
-
-    <label class="field-block mt-3">
-      <span>{{ profile_form.notes.label }}</span>
-      {{ profile_form.notes }}
-    </label>
-
-    <div class="wizard-actions premium-actions">
-      <button type="submit" class="btn btn-dark btn-pill">Save profile</button>
-      <a href="{% url 'citizen_dashboard' %}?lang={{ current_lang }}" class="btn btn-outline-dark btn-pill">Go to dashboard</a>
-    </div>
-  </form>
-
-  <aside class="premium-side-panel">
-    <span class="section-kicker">Quick hints</span>
-    <h2>How this helps</h2>
-    <ul class="plain-steps polished-list">
-      <li>District and support need improve relevance immediately.</li>
-      <li>Income and age reduce ineligible schemes in your results.</li>
-      <li>Document readiness improves next-step guidance.</li>
-    </ul>
   </aside>
+
+  <div class="account-main">
+    <section class="premium-panel account-header-panel">
+      <div>
+        <span class="section-kicker">Citizen Profile</span>
+        <h1>Update profile for accurate scheme matching</h1>
+      </div>
+      <div class="account-header-actions">
+        <a href="{% url 'citizen_dashboard' %}?lang={{ current_lang }}" class="btn btn-outline-dark btn-pill">Back to dashboard</a>
+      </div>
+    </section>
+
+    <form method="post" class="premium-form-panel account-profile-form">
+      {% csrf_token %}
+      {{ profile_form.language }}
+
+      {% if profile_saved %}
+      <div class="success-banner">Profile updated successfully.</div>
+      {% endif %}
+
+      <div class="account-form-section">
+        <div class="wizard-step-head">
+          <div>
+            <span class="section-kicker">Section 1</span>
+            <h2>Identity and location</h2>
+          </div>
+          <p>These fields decide state and district-specific eligibility filtering.</p>
+        </div>
+
+        <div class="form-grid two wizard-form-grid">
+          <label class="field-block">
+            <span>{{ profile_form.age.label }}</span>
+            {{ profile_form.age }}
+          </label>
+          <label class="field-block">
+            <span>{{ profile_form.gender.label }}</span>
+            {{ profile_form.gender }}
+          </label>
+          <label class="field-block">
+            <span>{{ profile_form.state.label }}</span>
+            {{ profile_form.state }}
+          </label>
+          <label class="field-block">
+            <span>{{ profile_form.district.label }}</span>
+            {{ profile_form.district }}
+          </label>
+          <label class="field-block">
+            <span>{{ profile_form.residence_type.label }}</span>
+            {{ profile_form.residence_type }}
+          </label>
+        </div>
+      </div>
+
+      <div class="account-form-section">
+        <div class="wizard-step-head">
+          <div>
+            <span class="section-kicker">Section 2</span>
+            <h2>Eligibility and support preferences</h2>
+          </div>
+          <p>These fields improve relevance and reduce non-applicable schemes.</p>
+        </div>
+
+        <div class="form-grid two wizard-form-grid">
+          <label class="field-block">
+            <span>{{ profile_form.annual_income.label }}</span>
+            {{ profile_form.annual_income }}
+          </label>
+          <label class="field-block">
+            <span>{{ profile_form.income_band.label }}</span>
+            {{ profile_form.income_band }}
+          </label>
+          <label class="field-block">
+            <span>{{ profile_form.support_need.label }}</span>
+            {{ profile_form.support_need }}
+          </label>
+          <label class="field-block">
+            <span>{{ profile_form.caste_category.label }}</span>
+            {{ profile_form.caste_category }}
+          </label>
+          <label class="field-block">
+            <span>{{ profile_form.document_readiness.label }}</span>
+            {{ profile_form.document_readiness }}
+          </label>
+        </div>
+      </div>
+
+      <div class="account-form-section">
+        <div class="wizard-step-head">
+          <div>
+            <span class="section-kicker">Section 3</span>
+            <h2>Beneficiary context</h2>
+          </div>
+        </div>
+
+        <div class="toggle-grid premium-toggle-grid">
+          <label class="field-toggle">{{ profile_form.is_student }} <span>{{ profile_form.is_student.label }}</span></label>
+          <label class="field-toggle">{{ profile_form.is_mother }} <span>{{ profile_form.is_mother.label }}</span></label>
+          <label class="field-toggle">{{ profile_form.is_entrepreneur }} <span>{{ profile_form.is_entrepreneur.label }}</span></label>
+          <label class="field-toggle">{{ profile_form.has_disability }} <span>{{ profile_form.has_disability.label }}</span></label>
+        </div>
+
+        <label class="field-block mt-3">
+          <span>{{ profile_form.notes.label }}</span>
+          {{ profile_form.notes }}
+        </label>
+      </div>
+
+      <div class="wizard-actions premium-actions">
+        <button type="submit" class="btn btn-dark btn-pill">Save profile</button>
+        <a href="{% url 'citizen_dashboard' %}?lang={{ current_lang }}" class="btn btn-outline-dark btn-pill">Go to dashboard</a>
+      </div>
+    </form>
+  </div>
 </section>
 {% endblock %}
-
