@@ -2,7 +2,7 @@ import json
 import os
 import re
 from datetime import date, datetime, timedelta
-from typing import Dict, Iterable, List, Optional
+from typing import Dict, Iterable, List, Optional, Tuple
 from urllib.parse import urlparse
 
 from django.core.cache import cache
@@ -13,6 +13,7 @@ from .models import EligibilityAssessment, Scheme
 
 CATEGORY_LABELS = {
     "education": "Education",
+    "agriculture": "Agriculture",
     "financial": "Financial Support",
     "health": "Health",
     "employment": "Jobs and Skills",
@@ -25,6 +26,11 @@ CATEGORY_ALIASES = {
     "study": "education",
     "student": "education",
     "scholarship": "education",
+    "agriculture": "agriculture",
+    "agri": "agriculture",
+    "farmer": "agriculture",
+    "farming": "agriculture",
+    "krishi": "agriculture",
     "shikshan": "education",
     "शिक्षा": "education",
     "शिक्षण": "education",
@@ -57,6 +63,8 @@ CATEGORY_ALIASES = {
     "महिला": "empowerment",
     "other": "other",
 }
+
+CASTE_TOKENS = {"general", "sc", "st", "obc", "ews", "minority"}
 
 INCOME_BAND_LIMITS = {
     "under_1l": 100000,
@@ -325,6 +333,49 @@ def derive_income_value(user_data: Dict) -> int:
     return INCOME_BAND_LIMITS.get(income_band, 99999999)
 
 
+def profile_completeness_report(profile) -> Dict:
+    username = ""
+    if hasattr(profile, "user") and profile.user:
+        username = profile.user.get_full_name() or profile.user.username or ""
+    elif isinstance(profile, dict):
+        username = str(profile.get("name", "")).strip()
+
+    age_value = getattr(profile, "age", None) if not isinstance(profile, dict) else profile.get("age")
+    state_value = getattr(profile, "state", "") if not isinstance(profile, dict) else profile.get("state", "")
+    district_value = getattr(profile, "district", "") if not isinstance(profile, dict) else profile.get("district", "")
+    income_value = getattr(profile, "annual_income", None) if not isinstance(profile, dict) else profile.get("annual_income")
+    caste_value = getattr(profile, "caste_category", "") if not isinstance(profile, dict) else profile.get("caste_category", "")
+    gender_value = getattr(profile, "gender", "") if not isinstance(profile, dict) else profile.get("gender", "")
+
+    if isinstance(profile, dict):
+        documents_ready = bool(profile.get("documents_available"))
+    else:
+        documents_manager = getattr(profile, "documents", None)
+        documents_ready = bool(documents_manager and documents_manager.exists())
+
+    checks = [
+        {"key": "name", "label": "Name", "done": bool(str(username).strip())},
+        {"key": "age", "label": "Age", "done": age_value is not None},
+        {"key": "state", "label": "State", "done": bool(str(state_value or "").strip())},
+        {"key": "district", "label": "District", "done": bool(str(district_value or "").strip())},
+        {"key": "income", "label": "Income", "done": income_value is not None},
+        {"key": "caste", "label": "Category", "done": bool(str(caste_value or "").strip())},
+        {"key": "gender", "label": "Gender", "done": bool(str(gender_value or "").strip())},
+        {"key": "documents", "label": "Documents available", "done": documents_ready},
+    ]
+    total = len(checks) or 1
+    complete = sum(1 for item in checks if item["done"])
+    percent = round((complete / total) * 100)
+    missing_labels = [item["label"] for item in checks if not item["done"]]
+    return {
+        "percent": percent,
+        "checks": checks,
+        "missing_labels": missing_labels,
+        "is_gate_open": percent >= 60,
+        "is_full": percent >= 100,
+    }
+
+
 def build_profile_tags(user_data: Dict) -> List[str]:
     tags = []
     age = user_data.get("age")
@@ -366,6 +417,76 @@ def _district_matches(scheme: Dict, district: Optional[str]) -> bool:
     if not district or not scheme["district_coverage"]:
         return True
     return district.lower() in {item.lower() for item in scheme["district_coverage"]}
+
+
+def _is_national_scheme(scheme: Dict) -> bool:
+    values = {item.strip().lower() for item in (scheme.get("state_coverage") or []) if str(item).strip()}
+    return bool(values.intersection({"all india", "india", "national", "all"}))
+
+
+def _eligible_categories_for_scheme(scheme: Dict) -> set:
+    text = " ".join(
+        [
+            str(scheme.get("name", "")),
+            str(scheme.get("description", "")),
+            str(scheme.get("eligibility", "")),
+            " ".join(scheme.get("beneficiary_tags", []) or []),
+        ]
+    ).lower()
+    matched = set()
+    pattern_map = {
+        "sc": [r"\bsc\b", "scheduled caste"],
+        "st": [r"\bst\b", "scheduled tribe"],
+        "obc": [r"\bobc\b", "other backward"],
+        "ews": [r"\bews\b"],
+        "minority": [r"\bminority\b"],
+        "general": [r"\bgeneral\b", "open category"],
+    }
+    for caste, patterns in pattern_map.items():
+        for pattern in patterns:
+            if re.search(pattern, text):
+                matched.add(caste)
+                break
+    return matched
+
+
+def _strict_scheme_match_with_reasons(scheme: Dict, profile_data: Dict) -> Tuple[bool, List[str], int]:
+    state_value = str(profile_data.get("state", "") or "").strip()
+    age_value = profile_data.get("age")
+    income_value = derive_income_value(profile_data)
+    caste_value = str(profile_data.get("caste_category", "") or "general").strip().lower()
+    gender_value = str(profile_data.get("gender", "") or "any").strip().lower()
+
+    reasons = []
+
+    if _state_matches(scheme, state_value) or _is_national_scheme(scheme):
+        reasons.append("State Match")
+    else:
+        return False, [], 0
+
+    if age_value is None or (scheme["min_age"] <= age_value <= scheme["max_age"]):
+        reasons.append("Age Match")
+    else:
+        return False, [], 0
+
+    if income_value <= int(scheme.get("income_limit") or 99999999):
+        reasons.append("Income Match")
+    else:
+        return False, [], 0
+
+    if scheme.get("gender", "any") in {"any", gender_value}:
+        reasons.append("Gender Match")
+    else:
+        return False, [], 0
+
+    eligible_categories = _eligible_categories_for_scheme(scheme)
+    if not eligible_categories or caste_value in eligible_categories or caste_value not in CASTE_TOKENS:
+        reasons.append("Category Match")
+    else:
+        return False, [], 0
+
+    score = max(72, min(100, round((len(reasons) / 5) * 100)))
+    return True, reasons, score
 
 
 def _age_income_gender_match(scheme: Dict, user_data: Dict) -> bool:
@@ -474,6 +595,28 @@ def recommend_schemes_from_profile(user_data: Dict, limit: int = 5) -> List[Dict
 
     ranked.sort(key=lambda item: (-item["match_score"], item["name"].lower()))
     return ranked[:limit]
+
+
+def filter_by_profile_completeness(user_profile, schemes: List[Dict]) -> List[Dict]:
+    if hasattr(user_profile, "to_recommendation_input"):
+        profile_data = user_profile.to_recommendation_input()
+    elif isinstance(user_profile, dict):
+        profile_data = dict(user_profile)
+    else:
+        profile_data = {}
+
+    filtered = []
+    for scheme in schemes:
+        matched, reasons, score_percent = _strict_scheme_match_with_reasons(scheme, profile_data)
+        if not matched:
+            continue
+        scheme_copy = dict(scheme)
+        scheme_copy["match_score_percent"] = score_percent
+        scheme_copy["match_reasons"] = [f"✅ {reason}" for reason in reasons]
+        filtered.append(scheme_copy)
+
+    filtered.sort(key=lambda item: (-item.get("match_score_percent", 0), item.get("name", "").lower()))
+    return filtered
 
 
 def check_scheme_eligibility(user_data: Dict) -> List[Dict]:

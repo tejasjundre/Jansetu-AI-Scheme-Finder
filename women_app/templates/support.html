@@ -15,40 +15,52 @@
   <form method="post" class="support-form" data-help-center-form data-help-api-url="{% url 'help_center_api' %}">
     {% csrf_token %}
     {{ support_form.preferred_language }}
+    {% if support_form.non_field_errors %}
+    <div class="field-error-block">
+      {{ support_form.non_field_errors }}
+    </div>
+    {% endif %}
     <div class="form-grid two">
       <label class="field-block">
         <span>{{ support_form.name.label }}</span>
         {{ support_form.name }}
+        {% if support_form.name.errors %}<small class="field-error">{{ support_form.name.errors.0 }}</small>{% endif %}
       </label>
       <label class="field-block">
         <span>{{ support_form.phone_number.label }}</span>
         {{ support_form.phone_number }}
+        {% if support_form.phone_number.errors %}<small class="field-error">{{ support_form.phone_number.errors.0 }}</small>{% endif %}
       </label>
       <label class="field-block">
         <span>{{ support_form.email.label }}</span>
         {{ support_form.email }}
+        {% if support_form.email.errors %}<small class="field-error">{{ support_form.email.errors.0 }}</small>{% endif %}
       </label>
       <label class="field-block">
         <span>{{ support_form.support_type.label }}</span>
         {{ support_form.support_type }}
+        {% if support_form.support_type.errors %}<small class="field-error">{{ support_form.support_type.errors.0 }}</small>{% endif %}
       </label>
       <label class="field-block">
         <span>{{ support_form.state.label }}</span>
         {{ support_form.state }}
+        {% if support_form.state.errors %}<small class="field-error">{{ support_form.state.errors.0 }}</small>{% endif %}
       </label>
       <label class="field-block">
         <span>{{ support_form.district.label }}</span>
         {{ support_form.district }}
+        {% if support_form.district.errors %}<small class="field-error">{{ support_form.district.errors.0 }}</small>{% endif %}
       </label>
     </div>
 
     <label class="field-block mt-3">
       <span>{{ support_form.message.label }}</span>
       {{ support_form.message }}
+      {% if support_form.message.errors %}<small class="field-error">{{ support_form.message.errors.0 }}</small>{% endif %}
     </label>
 
     <div class="wizard-actions">
-      <button type="submit" class="btn btn-dark btn-pill">{{ t.support_submit }}</button>
+      <button type="submit" class="btn btn-success px-4 py-2">{{ t.support_submit }}</button>
     </div>
 
     {% if submitted %}

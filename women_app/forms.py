@@ -1,6 +1,10 @@
+import re
+
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
 
 from .localization import get_content_list, get_field_choices, get_field_labels, get_ui_strings
 from .location_data import canonical_state_name, get_district_choices, get_state_choices
@@ -178,6 +182,58 @@ class EscalationRequestForm(LocalizedDistrictFormMixin, forms.ModelForm):
         super().__init__(*args, **kwargs)
         self._localize_common_fields(lang)
         self.fields["support_type"].choices = get_field_choices("support_type", lang)
+        self.fields["name"].widget.attrs.update(
+            {
+                "placeholder": "Enter your full name",
+                "autocomplete": "name",
+            }
+        )
+        self.fields["phone_number"].widget.attrs.update(
+            {
+                "placeholder": "10-digit mobile number",
+                "inputmode": "numeric",
+                "autocomplete": "tel",
+                "pattern": "(?:\\+91[\\s-]?)?[6-9][0-9]{9}",
+                "maxlength": "16",
+                "title": "Enter a valid Indian mobile number (example: 9876543210).",
+            }
+        )
+        self.fields["email"].required = False
+        self.fields["email"].widget.attrs.update(
+            {
+                "placeholder": "Email address (optional)",
+                "autocomplete": "email",
+                "inputmode": "email",
+            }
+        )
+        self.fields["message"].widget.attrs.update(
+            {
+                "placeholder": "Briefly describe the help you need...",
+            }
+        )
+
+    def clean_phone_number(self):
+        raw_value = (self.cleaned_data.get("phone_number") or "").strip()
+        digits = re.sub(r"\D", "", raw_value)
+        if digits.startswith("91") and len(digits) == 12:
+            digits = digits[2:]
+        if len(digits) != 10 or digits[0] not in "6789":
+            raise forms.ValidationError(
+                "Enter a valid 10-digit Indian mobile number (example: 9876543210)."
+            )
+        return digits
+
+    def clean_email(self):
+        value = (self.cleaned_data.get("email") or "").strip().lower()
+        if not value:
+            return ""
+        try:
+            validate_email(value)
+        except ValidationError as exc:
+            raise forms.ValidationError(
+                "Enter a valid email address (example: name@example.com)."
+            ) from exc
+        return value
 
 
 class EscalationOpsUpdateForm(forms.ModelForm):
@@ -212,9 +268,37 @@ class CitizenRegisterForm(UserCreationForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["username"].widget.attrs.update({"placeholder": "Choose username"})
-        self.fields["email"].widget.attrs.update({"placeholder": "Email (optional)"})
+        self.fields["email"].widget.attrs.update(
+            {
+                "placeholder": "Email (optional)",
+                "autocomplete": "email",
+                "inputmode": "email",
+            }
+        )
         self.fields["password1"].widget.attrs.update({"placeholder": "Create password"})
         self.fields["password2"].widget.attrs.update({"placeholder": "Confirm password"})
+
+    def clean_email(self):
+        value = (self.cleaned_data.get("email") or "").strip().lower()
+        if not value:
+            return ""
+
+        try:
+            validate_email(value)
+        except ValidationError as exc:
+            raise forms.ValidationError(
+                "Enter a valid email address (example: name@example.com)."
+            ) from exc
+
+        user_model = get_user_model()
+        duplicate_qs = user_model.objects.filter(email__iexact=value)
+        if self.instance.pk:
+            duplicate_qs = duplicate_qs.exclude(pk=self.instance.pk)
+        if duplicate_qs.exists():
+            raise forms.ValidationError(
+                "An account with this email already exists. Please login or use another email."
+            )
+        return value
 
     def save(self, commit=True):
         user = super().save(commit=False)
@@ -267,3 +351,44 @@ class CitizenProfileForm(LocalizedDistrictFormMixin, forms.ModelForm):
         self.fields["residence_type"].choices = get_field_choices("residence_type", lang)
         self.fields["caste_category"].choices = get_field_choices("caste_category", lang)
         self.fields["document_readiness"].choices = get_field_choices("document_readiness", lang)
+
+
+class ApplicationSubmissionForm(forms.Form):
+    scheme_name = forms.CharField(max_length=220)
+    aadhaar_number = forms.CharField(max_length=12, min_length=4)
+    bank_account = forms.CharField(max_length=24)
+    annual_income = forms.IntegerField(min_value=0)
+    caste_category = forms.ChoiceField(choices=EligibilityAssessment.CASTE_CHOICES)
+    education_level = forms.ChoiceField(
+        choices=[
+            ("school", "School"),
+            ("diploma", "Diploma"),
+            ("graduate", "Graduate"),
+            ("postgraduate", "Postgraduate"),
+            ("other", "Other"),
+        ]
+    )
+    notes = forms.CharField(required=False, widget=forms.Textarea(attrs={"rows": 3}))
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["scheme_name"].label = "Scheme name"
+        self.fields["scheme_name"].widget.attrs.update({"placeholder": "Type or select a scheme"})
+        self.fields["aadhaar_number"].label = "Aadhaar number (last 4-12 digits)"
+        self.fields["aadhaar_number"].widget.attrs.update({"placeholder": "Example: 1234"})
+        self.fields["bank_account"].label = "Bank account number"
+        self.fields["bank_account"].widget.attrs.update({"placeholder": "Enter beneficiary account number"})
+        self.fields["annual_income"].label = "Annual income (INR)"
+        self.fields["annual_income"].widget.attrs.update({"placeholder": "Example: 250000"})
+        self.fields["caste_category"].label = "Caste category"
+        self.fields["education_level"].label = "Education level"
+        self.fields["notes"].label = "Additional notes (optional)"
+        self.fields["notes"].widget.attrs.update({"placeholder": "Any special context for verification..."})
+
+    def clean_aadhaar_number(self):
+        value = str(self.cleaned_data["aadhaar_number"]).strip()
+        if len(value) < 4:
+            raise forms.ValidationError("Enter at least last 4 digits for Aadhaar verification.")
+        if not value.isdigit():
+            raise forms.ValidationError("Aadhaar value should contain digits only.")
+        return value

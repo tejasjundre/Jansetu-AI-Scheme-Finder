@@ -1,6 +1,15 @@
 from django.contrib import admin
 
-from .models import AuditLog, ChatHistory, CitizenProfile, EligibilityAssessment, EscalationRequest, Scheme
+from .models import (
+    AuditLog,
+    ChatHistory,
+    CitizenApplication,
+    CitizenDocument,
+    CitizenProfile,
+    EligibilityAssessment,
+    EscalationRequest,
+    Scheme,
+)
 
 
 admin.site.site_header = "JanSetu Admin"
@@ -96,6 +105,22 @@ class CitizenProfileAdmin(admin.ModelAdmin):
     list_filter = ("support_need", "income_band", "state", "updated_at")
     search_fields = ("user__username", "user__email", "state", "district")
     readonly_fields = ("created_at", "updated_at")
+
+
+@admin.register(CitizenApplication)
+class CitizenApplicationAdmin(admin.ModelAdmin):
+    list_display = ("application_id", "profile", "scheme_name", "status", "submitted_at")
+    list_filter = ("status", "submitted_at")
+    search_fields = ("application_id", "scheme_name", "profile__user__username")
+    readonly_fields = ("application_id", "submitted_at", "updated_at")
+
+
+@admin.register(CitizenDocument)
+class CitizenDocumentAdmin(admin.ModelAdmin):
+    list_display = ("document_type", "file_name", "profile", "verification_status", "uploaded_at")
+    list_filter = ("verification_status", "uploaded_at")
+    search_fields = ("document_type", "file_name", "profile__user__username")
+    readonly_fields = ("uploaded_at",)
 
 
 @admin.register(AuditLog)

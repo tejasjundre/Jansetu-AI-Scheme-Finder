@@ -4,153 +4,167 @@
 {% block body_class %}page-schemes{% endblock %}
 
 {% block content %}
-<section class="page-hero premium-hero compact">
-  <span class="section-kicker">{{ t.schemes_title }}</span>
-  <h1>{{ t.schemes_heading }}</h1>
-  <p class="lead-copy compact-copy">{{ t.schemes_subtitle }}</p>
-  {% if personalized_mode %}
-  <div class="trust-ribbon">
-    <span class="promise-chip">Personalized mode active</span>
-    <span class="promise-chip">Based on your saved profile</span>
-    <a href="{% url 'citizen_profile' %}?lang={{ current_lang }}" class="text-link">Edit profile</a>
+<section class="premium-panel mahadbt-table-card mb-3">
+  <div class="schemes-hero-row">
+    <div class="schemes-hero-copy">
+      <h1 class="mb-1">{{ t.schemes_heading }}</h1>
+      <p class="mb-0 text-muted">{{ t.schemes_subtitle }}</p>
+    </div>
+    <div class="schemes-hero-actions">
+      <a href="{% url 'wizard' %}?lang={{ current_lang }}" class="btn btn-primary px-4 py-2">Eligibility Check</a>
+      <a href="{% url 'chat' %}?lang={{ current_lang }}" class="btn btn-orange px-4 py-2">Ask AI</a>
+    </div>
   </div>
+</section>
+
+{% if request.user.is_authenticated and profile_gate_state == "blocked" %}
+<section class="alert alert-warning mahadbt-alert">
+  <strong>Complete your profile to see schemes matched to your eligibility.</strong>
+  <p class="mb-2">The more you fill, the better your matches.</p>
+  <a href="{% url 'citizen_profile' %}?lang={{ current_lang }}" class="btn btn-warning btn-lg px-4 py-2">Complete Profile Now</a>
+</section>
+{% else %}
+  {% if request.user.is_authenticated and profile_gate_state == "partial" %}
+  <section class="alert alert-warning mahadbt-alert">
+    <strong>Complete your full profile for more accurate matches.</strong>
+  </section>
+  {% elif request.user.is_authenticated and profile_gate_state == "full" %}
+  <section class="alert alert-success mahadbt-alert">
+    <strong>Profile Complete! Showing all schemes matched to your eligibility.</strong>
+  </section>
   {% endif %}
-</section>
 
-<section class="stats-grid compact-stats premium-stats-grid">
-  <article class="stat-card premium-stat-card">
-    <span class="panel-label">{{ t.catalogue_records }}</span>
-    <strong>{{ scheme_total }}</strong>
-  </article>
-  <article class="stat-card premium-stat-card">
-    <span class="panel-label">{{ t.simple_categories }}</span>
-    <strong>{{ categories|length }}</strong>
-  </article>
-  <article class="stat-card premium-stat-card">
-    <span class="panel-label">{{ t.current_page }}</span>
-    <strong>{{ page_obj.number }}</strong>
-  </article>
-</section>
+  <section class="schemes-modern-shell">
+    <span class="schemes-bubble bubble-a" aria-hidden="true"></span>
+    <span class="schemes-bubble bubble-b" aria-hidden="true"></span>
+    <span class="schemes-bubble bubble-c" aria-hidden="true"></span>
 
-<form method="get" class="filter-bar premium-filter-bar">
-  <input type="hidden" name="lang" value="{{ current_lang }}">
-  <input type="text" name="q" value="{{ selected_query }}" class="form-control filter-input" placeholder="{{ t.schemes_search_placeholder }}">
-  <select name="category" class="form-select filter-select" aria-label="{{ t.filter_all_categories }}">
-    <option value="">{{ t.filter_all_categories }}</option>
-    {% for category in categories %}
-    <option value="{{ category.value }}" {% if selected_category == category.value %}selected{% endif %}>{{ category.label }}</option>
-    {% endfor %}
-  </select>
-  <select name="state" class="form-select filter-select" aria-label="{{ t.filter_all_states }}">
-    <option value="">{{ t.filter_all_states }}</option>
-    {% for state in state_options %}
-    <option value="{{ state }}" {% if selected_state == state %}selected{% endif %}>{{ state }}</option>
-    {% endfor %}
-  </select>
-  <select name="sort" class="form-select filter-select" aria-label="Sort results">
-    <option value="recommended" {% if selected_sort == "recommended" %}selected{% endif %}>Best quality</option>
-    <option value="recent" {% if selected_sort == "recent" %}selected{% endif %}>Recently verified</option>
-    <option value="expiry" {% if selected_sort == "expiry" %}selected{% endif %}>Closing soon</option>
-    <option value="name" {% if selected_sort == "name" %}selected{% endif %}>Name A-Z</option>
-  </select>
-  <button type="submit" class="btn btn-dark btn-pill">{{ t.apply_filters }}</button>
-</form>
-
-<section id="schemeContainer" class="scheme-grid premium-scheme-grid">
-  {% for scheme in schemes %}
-  <article class="scheme-card premium-scheme-card">
-    <div class="scheme-card-top">
-      <div class="scheme-head-row">
-        <span class="scheme-tag">{{ scheme.category_label }}</span>
-        <span class="badge-soft {% if scheme.verification_status == 'verified' %}badge-verified{% elif scheme.verification_status == 'broken' %}badge-broken{% else %}badge-review{% endif %}">
-          {{ scheme.verification_status|title }}
-        </span>
-      </div>
-      <h2>{{ scheme.name }}</h2>
-      <p>{{ scheme.description }}</p>
-    </div>
-
-    <div class="scheme-meta premium-meta-grid">
-      <span><strong>{{ t.detail_source_label }}</strong> {{ scheme.official_source_name|default:t.official_source_pending }}</span>
-      <span><strong>{{ t.detail_coverage_label }}</strong> {{ scheme.state_coverage|join:", " }}</span>
-      <span><strong>{{ t.detail_last_verified_label }}</strong> {{ scheme.last_verified_on|default:t.not_set }}</span>
-    </div>
-
-    <div class="reason-list">
-      {% for tag in scheme.beneficiary_tags|slice:":4" %}
-      <span class="reason-chip">{{ tag|title }}</span>
-      {% endfor %}
-    </div>
-
-    <div class="result-snapshot-grid">
-      <article class="snapshot-tile">
-        <span class="panel-label">{{ t.what_to_do_next }}</span>
-        <p>{{ scheme.next_steps.where_to_apply|default:scheme.where_to_apply|default:t.scheme_apply_fallback }}</p>
-      </article>
-      <article class="snapshot-tile">
-        <span class="panel-label">{{ t.detail_effort_level_label }}</span>
-        <p>{{ scheme.effort_level|title }}</p>
-      </article>
-    </div>
-
-    <details class="detail-disclosure">
-      <summary>Expand details</summary>
-      <div class="detail-disclosure-body">
-        <div class="result-detail">
-          <strong>{{ t.documents_label }}</strong>
-          <ul class="plain-steps">
-            {% for doc in scheme.required_documents|slice:":5" %}
-            <li>{{ doc }}</li>
-            {% empty %}
-            <li>{{ t.documents_fallback }}</li>
+    <section class="premium-panel mahadbt-filter-panel mb-3 modern-filter-panel">
+      <h2 class="mb-3">Filter Schemes</h2>
+      <form method="get" class="row g-3 align-items-end">
+        <input type="hidden" name="lang" value="{{ current_lang }}">
+        <div class="col-md-3">
+          <label class="form-label">Search</label>
+          <input type="text" name="q" value="{{ selected_query }}" class="form-control" placeholder="{{ t.schemes_search_placeholder }}">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">Scheme Type</label>
+          <select name="category" class="form-select">
+            <option value="">{{ t.filter_all_categories }}</option>
+            {% for category in categories %}
+            <option value="{{ category.value }}" {% if selected_category == category.value %}selected{% endif %}>{{ category.label }}</option>
             {% endfor %}
-          </ul>
+          </select>
         </div>
-        <div class="result-detail">
-          <strong>District coverage</strong>
-          <p>
-            {% if scheme.district_coverage %}
-            {{ scheme.district_coverage|slice:":6"|join:", " }}{% if scheme.district_coverage|length > 6 %} and more{% endif %}
-            {% else %}
-            Covered across the listed state scope.
-            {% endif %}
-          </p>
+        <div class="col-md-2">
+          <label class="form-label">State</label>
+          <select name="state" class="form-select">
+            <option value="">{{ t.filter_all_states }}</option>
+            {% for state in state_options %}
+            <option value="{{ state }}" {% if selected_state == state %}selected{% endif %}>{{ state }}</option>
+            {% endfor %}
+          </select>
         </div>
+        <div class="col-md-2">
+          <label class="form-label">Sort</label>
+          <select name="sort" class="form-select">
+            <option value="recommended" {% if selected_sort == "recommended" %}selected{% endif %}>Recommended</option>
+            <option value="recent" {% if selected_sort == "recent" %}selected{% endif %}>Recently Verified</option>
+            <option value="expiry" {% if selected_sort == "expiry" %}selected{% endif %}>Closing Soon</option>
+            <option value="name" {% if selected_sort == "name" %}selected{% endif %}>Name A-Z</option>
+          </select>
+        </div>
+        <div class="col-md-3 d-flex gap-2">
+          <button type="submit" class="btn btn-primary px-4 py-2">Apply Filters</button>
+          <a href="{% url 'schemes' %}?lang={{ current_lang }}" class="btn btn-danger px-4 py-2">Reset</a>
+        </div>
+      </form>
+    </section>
+
+    <section class="premium-panel modern-scheme-panel">
+      <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <h2 class="mb-0">Eligible Scheme Listing</h2>
+        <span class="badge bg-primary">Showing {{ scheme_total }} eligible schemes for your profile</span>
       </div>
-    </details>
 
-    <div class="result-actions">
-      {% if scheme.slug %}
-      <a href="{% url 'scheme_detail' scheme.slug %}?lang={{ current_lang }}" class="btn btn-dark btn-pill">{{ t.chat_open_details }}</a>
+      <div class="modern-scheme-grid">
+        {% for scheme in schemes %}
+        <article class="modern-scheme-card">
+          <div class="modern-scheme-head">
+            {% if scheme.slug %}
+            <h3><a href="{% url 'scheme_detail' scheme.slug %}?lang={{ current_lang }}" class="mahadbt-link">{{ scheme.name }}</a></h3>
+            {% else %}
+            <h3>{{ scheme.name }}</h3>
+            {% endif %}
+
+            {% if scheme.match_score_percent %}
+            {% if scheme.match_score_percent >= 90 %}
+            <span class="badge bg-success">{{ scheme.match_score_percent }}% Match</span>
+            {% elif scheme.match_score_percent >= 75 %}
+            <span class="badge bg-warning text-dark">{{ scheme.match_score_percent }}% Match</span>
+            {% else %}
+            <span class="badge bg-primary">{{ scheme.match_score_percent }}% Match</span>
+            {% endif %}
+            {% else %}
+            <span class="badge bg-primary">80% Match</span>
+            {% endif %}
+          </div>
+
+          <p class="modern-scheme-meta"><strong>Department:</strong> {{ scheme.official_source_name|default:"Government Department" }}</p>
+          <p class="modern-scheme-meta"><strong>Type:</strong> <span class="badge bg-secondary">{{ scheme.category_label }}</span></p>
+
+          <p class="modern-scheme-desc">{{ scheme.description|default:"Official benefit scheme with eligibility-based support." }}</p>
+
+          <div class="mahadbt-reasons mt-1">
+            {% if scheme.match_reasons %}
+              {% for reason in scheme.match_reasons %}
+              <span class="badge bg-light text-success border">{{ reason }}</span>
+              {% endfor %}
+            {% else %}
+              {% for tag in scheme.beneficiary_tags|slice:":3" %}
+              <span class="badge bg-light text-success border">✅ {{ tag|title }} Match</span>
+              {% endfor %}
+            {% endif %}
+          </div>
+
+          <div class="modern-scheme-actions">
+            {% if scheme.url %}
+            <a href="{{ scheme.url }}" target="_blank" rel="noopener noreferrer" class="btn btn-success btn-sm px-4 py-2">Apply</a>
+            {% elif scheme.slug %}
+            <a href="{% url 'scheme_detail' scheme.slug %}?lang={{ current_lang }}" class="btn btn-success btn-sm px-4 py-2">Apply</a>
+            {% endif %}
+
+            {% if scheme.slug %}
+            <a href="{% url 'scheme_detail' scheme.slug %}?lang={{ current_lang }}" class="btn btn-primary btn-sm px-4 py-2">View Details</a>
+            {% endif %}
+          </div>
+        </article>
+        {% empty %}
+        <div class="empty-panel">
+          <h3>No eligible schemes found for current filters/profile.</h3>
+          <p>Try changing category/state filters or updating profile details.</p>
+        </div>
+        {% endfor %}
+      </div>
+
+      {% if page_obj.paginator.num_pages > 1 %}
+      <nav class="d-flex justify-content-between align-items-center mt-3" aria-label="Scheme pages">
+        {% if page_obj.has_previous %}
+        <a href="?lang={{ current_lang }}&q={{ selected_query }}&category={{ selected_category }}&state={{ selected_state }}&sort={{ selected_sort }}&page={{ page_obj.previous_page_number }}" class="btn btn-primary px-4 py-2">{{ t.previous }}</a>
+        {% else %}
+        <button type="button" class="btn btn-secondary px-4 py-2" disabled>{{ t.previous }}</button>
+        {% endif %}
+
+        <span class="fw-semibold">{{ t.current_page }} {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+
+        {% if page_obj.has_next %}
+        <a href="?lang={{ current_lang }}&q={{ selected_query }}&category={{ selected_category }}&state={{ selected_state }}&sort={{ selected_sort }}&page={{ page_obj.next_page_number }}" class="btn btn-primary px-4 py-2">{{ t.next }}</a>
+        {% else %}
+        <button type="button" class="btn btn-secondary px-4 py-2" disabled>{{ t.next }}</button>
+        {% endif %}
+      </nav>
       {% endif %}
-      {% if scheme.url %}
-      <a href="{{ scheme.url }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-dark btn-pill">{{ t.open_official_page }}</a>
-      {% endif %}
-    </div>
-  </article>
-  {% empty %}
-  <div class="empty-panel">
-    <h3>{{ t.no_matching_schemes }}</h3>
-    <p>{{ t.no_matching_schemes_help }}</p>
-  </div>
-  {% endfor %}
-</section>
-
-{% if page_obj.paginator.num_pages > 1 %}
-<nav class="pagination-bar" aria-label="Scheme pages">
-  {% if page_obj.has_previous %}
-  <a href="?lang={{ current_lang }}&q={{ selected_query }}&category={{ selected_category }}&state={{ selected_state }}&sort={{ selected_sort }}&page={{ page_obj.previous_page_number }}" class="ghost-btn">{{ t.previous }}</a>
-  {% else %}
-  <span class="ghost-btn disabled-chip">{{ t.previous }}</span>
-  {% endif %}
-
-  <span class="pagination-label">{{ t.current_page }} {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
-
-  {% if page_obj.has_next %}
-  <a href="?lang={{ current_lang }}&q={{ selected_query }}&category={{ selected_category }}&state={{ selected_state }}&sort={{ selected_sort }}&page={{ page_obj.next_page_number }}" class="ghost-btn">{{ t.next }}</a>
-  {% else %}
-  <span class="ghost-btn disabled-chip">{{ t.next }}</span>
-  {% endif %}
-</nav>
+    </section>
+  </section>
 {% endif %}
 {% endblock %}

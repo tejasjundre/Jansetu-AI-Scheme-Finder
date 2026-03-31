@@ -1,4 +1,5 @@
 from datetime import timedelta
+import uuid
 
 from django.conf import settings
 from django.db import models
@@ -344,3 +345,79 @@ class CitizenProfile(models.Model):
             "document_readiness": self.document_readiness,
             "notes": self.notes,
         }
+
+
+class CitizenApplication(models.Model):
+    STATUS_CHOICES = [
+        ("under_review", "Under Review"),
+        ("approved", "Approved"),
+        ("rejected", "Rejected"),
+    ]
+
+    profile = models.ForeignKey(
+        CitizenProfile,
+        on_delete=models.CASCADE,
+        related_name="applications",
+    )
+    application_id = models.CharField(max_length=20, unique=True, blank=True)
+    scheme_name = models.CharField(max_length=220)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="under_review")
+    notes = models.TextField(blank=True)
+    ai_summary = models.TextField(blank=True)
+    submitted_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-submitted_at"]
+        verbose_name = "Citizen Application"
+        verbose_name_plural = "Citizen Applications"
+        indexes = [
+            models.Index(fields=["status", "-submitted_at"]),
+            models.Index(fields=["profile", "-submitted_at"]),
+        ]
+
+    def __str__(self):
+        return f"{self.application_id or 'APP'} - {self.scheme_name}"
+
+    def save(self, *args, **kwargs):
+        if not self.application_id:
+            self.application_id = f"JS{uuid.uuid4().hex[:10].upper()}"
+        super().save(*args, **kwargs)
+
+
+class CitizenDocument(models.Model):
+    STATUS_CHOICES = [
+        ("pending", "Pending Verification"),
+        ("verified", "Verified"),
+        ("rejected", "Rejected"),
+    ]
+
+    profile = models.ForeignKey(
+        CitizenProfile,
+        on_delete=models.CASCADE,
+        related_name="documents",
+    )
+    application = models.ForeignKey(
+        CitizenApplication,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="documents",
+    )
+    document_type = models.CharField(max_length=100)
+    file_name = models.CharField(max_length=255)
+    verification_status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
+    file_size_kb = models.PositiveIntegerField(default=0)
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-uploaded_at"]
+        verbose_name = "Citizen Document"
+        verbose_name_plural = "Citizen Documents"
+        indexes = [
+            models.Index(fields=["verification_status", "-uploaded_at"]),
+            models.Index(fields=["profile", "-uploaded_at"]),
+        ]
+
+    def __str__(self):
+        return f"{self.document_type} - {self.file_name}"

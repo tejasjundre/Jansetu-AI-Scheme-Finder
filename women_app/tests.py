@@ -3,13 +3,22 @@ from datetime import date, timedelta
 from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
 from django.test import Client, TestCase
 from django.urls import reverse
 from django.utils import timezone
 
 from .myscheme_api import merge_myscheme_detail_into_record
-from .models import ChatHistory, CitizenProfile, EligibilityAssessment, EscalationRequest, Scheme
+from .models import (
+    ChatHistory,
+    CitizenApplication,
+    CitizenDocument,
+    CitizenProfile,
+    EligibilityAssessment,
+    EscalationRequest,
+    Scheme,
+)
 
 
 class PageTests(TestCase):
@@ -138,6 +147,40 @@ class WizardAndSupportTests(TestCase):
         self.assertEqual(EscalationRequest.objects.count(), 1)
         self.assertContains(response, "saved")
 
+    def test_support_submission_rejects_invalid_phone_and_email(self):
+        payload = {
+            "name": "Asha",
+            "phone_number": "12345",
+            "email": "asha-at-example",
+            "preferred_language": "en",
+            "support_type": "callback",
+            "state": "Maharashtra",
+            "district": "Pune",
+            "message": "Need offline help with documents",
+        }
+        response = self.client.post(reverse("support"), data=payload)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(EscalationRequest.objects.count(), 0)
+        self.assertIn("phone_number", response.context["support_form"].errors)
+        self.assertIn("email", response.context["support_form"].errors)
+
+    def test_support_submission_normalizes_country_code_mobile(self):
+        payload = {
+            "name": "Asha",
+            "phone_number": "+91 98765 43210",
+            "email": "asha@example.com",
+            "preferred_language": "en",
+            "support_type": "callback",
+            "state": "Maharashtra",
+            "district": "Pune",
+            "message": "Need offline help with documents",
+        }
+        response = self.client.post(reverse("support"), data=payload)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(EscalationRequest.objects.count(), 1)
+        request_record = EscalationRequest.objects.first()
+        self.assertEqual(request_record.phone_number, "9876543210")
+
 
 class CitizenAuthProfileTests(TestCase):
     def test_register_creates_user_and_profile(self):
@@ -154,6 +197,20 @@ class CitizenAuthProfileTests(TestCase):
         self.assertTrue(get_user_model().objects.filter(username="citizen1").exists())
         user = get_user_model().objects.get(username="citizen1")
         self.assertTrue(CitizenProfile.objects.filter(user=user).exists())
+
+    def test_register_rejects_invalid_email(self):
+        response = self.client.post(
+            reverse("citizen_register"),
+            data={
+                "username": "citizen_bad_email",
+                "email": "not-a-valid-email",
+                "password1": "StrongPass123!",
+                "password2": "StrongPass123!",
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(get_user_model().objects.filter(username="citizen_bad_email").exists())
+        self.assertContains(response, "valid email address")
 
     def test_login_and_personalized_schemes_mode(self):
         user = get_user_model().objects.create_user(username="citizen2", password="StrongPass123!")
@@ -175,11 +232,54 @@ class CitizenAuthProfileTests(TestCase):
         )
         response = self.client.get(reverse("schemes"))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Personalized mode active")
+        self.assertContains(response, "Eligible Scheme Listing")
 
     def test_profile_page_requires_login(self):
         response = self.client.get(reverse("citizen_profile"))
         self.assertEqual(response.status_code, 302)
+
+    def test_applications_page_requires_login(self):
+        response = self.client.get(reverse("citizen_applications"))
+        self.assertEqual(response.status_code, 302)
+
+    def test_application_submission_creates_application_and_documents(self):
+        user = get_user_model().objects.create_user(username="citizen3", password="StrongPass123!")
+        profile = CitizenProfile.objects.create(
+            user=user,
+            age=28,
+            annual_income=240000,
+            income_band="under_5l",
+            gender="female",
+            state="Maharashtra",
+            district="Pune",
+            residence_type="urban",
+            support_need="education",
+            document_readiness="partial",
+        )
+        self.client.force_login(user)
+
+        document_one = SimpleUploadedFile("aadhaar-proof.pdf", b"fake-pdf", content_type="application/pdf")
+        document_two = SimpleUploadedFile("income-proof.pdf", b"fake-pdf", content_type="application/pdf")
+
+        response = self.client.post(
+            reverse("citizen_application_new"),
+            data={
+                "scheme_name": "Post Matric Scholarship",
+                "aadhaar_number": "1234",
+                "bank_account": "1234567890",
+                "annual_income": 240000,
+                "caste_category": "obc",
+                "education_level": "graduate",
+                "notes": "Ready to apply",
+                "documents": [document_one, document_two],
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(CitizenApplication.objects.filter(profile=profile).count(), 1)
+        application = CitizenApplication.objects.get(profile=profile)
+        self.assertEqual(application.status, "under_review")
+        self.assertEqual(CitizenDocument.objects.filter(profile=profile, application=application).count(), 2)
 
 
 class ChatApiTests(TestCase):

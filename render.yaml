@@ -4,7 +4,7 @@ services:
     env: python
     plan: free
     buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput
-    startCommand: python manage.py migrate --noinput && python manage.py seed_schemes --if-empty && gunicorn ai_sakhi.wsgi:application --bind 0.0.0.0:$PORT --workers 1 --timeout 120
+    startCommand: python manage.py migrate --noinput && python manage.py seed_schemes --min-count 5000 && gunicorn ai_sakhi.wsgi:application --bind 0.0.0.0:$PORT --workers 1 --timeout 120
     healthCheckPath: /healthz/
     autoDeploy: true
     envVars:

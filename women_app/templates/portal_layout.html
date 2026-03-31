@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ portal_title|default:t.brand_name }} | {{ t.brand_name }}{% endblock %}
+{% block body_class %}page-portal {% block portal_body_class %}{% endblock %}{% endblock %}
+
+{% block content %}
+<section class="portal-shell">
+  <aside class="portal-sidebar premium-side-panel">
+    <div class="portal-profile-card">
+      <span class="section-kicker">Citizen Panel</span>
+      <h2>{{ request.user.username }}</h2>
+      <p class="small-muted">Applicant ID: JS-{{ request.user.id|stringformat:"05d" }}</p>
+    </div>
+
+    <nav class="portal-nav">
+      <a href="{% url 'citizen_profile' %}?lang={{ current_lang }}" class="portal-nav-link{% if portal_active == 'profile' %} is-active{% endif %}">
+        <i class="bi bi-patch-check"></i>
+        <span>Aadhaar/ID Link Status</span>
+      </a>
+      <a href="{% url 'citizen_dashboard' %}?lang={{ current_lang }}" class="portal-nav-link{% if portal_active == 'dashboard' %} is-active{% endif %}">
+        <i class="bi bi-house-fill"></i>
+        <span>Home</span>
+      </a>
+      <a href="{% url 'citizen_profile' %}?lang={{ current_lang }}" class="portal-nav-link{% if portal_active == 'profile' %} is-active{% endif %}">
+        <i class="bi bi-person-circle"></i>
+        <span>Profile</span>
+      </a>
+      <a href="{% url 'schemes' %}?lang={{ current_lang }}" class="portal-nav-link">
+        <i class="bi bi-list-ul"></i>
+        <span>All Schemes</span>
+      </a>
+      <a href="{% url 'citizen_applications' %}?lang={{ current_lang }}&status=under_review" class="portal-nav-link{% if portal_active == 'applications' %} is-active{% endif %}">
+        <i class="bi bi-file-earmark-check"></i>
+        <span>My Applied Schemes</span>
+      </a>
+      <a href="{% url 'schemes' %}?lang={{ current_lang }}&sort=recommended" class="portal-nav-link">
+        <i class="bi bi-bookmark-heart"></i>
+        <span>Saved Schemes</span>
+      </a>
+      <a href="{% url 'support' %}?lang={{ current_lang }}" class="portal-nav-link">
+        <i class="bi bi-chat-left-text"></i>
+        <span>Grievance/Suggestion</span>
+      </a>
+      <a href="{% url 'citizen_applications' %}?lang={{ current_lang }}&status=under_review" class="portal-nav-link{% if portal_active == 'applications' %} is-active{% endif %}">
+        <i class="bi bi-bell-fill"></i>
+        <span>Notification</span>
+      </a>
+      <a href="{% url 'citizen_documents' %}?lang={{ current_lang }}&status=all" class="portal-nav-link{% if portal_active == 'documents' %} is-active{% endif %}">
+        <i class="bi bi-clock-history"></i>
+        <span>My Scheme History</span>
+      </a>
+    </nav>
+
+    <div class="portal-mini-grid">
+      <article class="portal-mini-card">
+        <span class="panel-label">Notifications</span>
+        <strong>{{ portal_notification_count|default:0 }}</strong>
+      </article>
+      <article class="portal-mini-card">
+        <span class="panel-label">Pending apps</span>
+        <strong>{{ portal_pending_apps|default:0 }}</strong>
+      </article>
+      <article class="portal-mini-card">
+        <span class="panel-label">Pending docs</span>
+        <strong>{{ portal_pending_docs|default:0 }}</strong>
+      </article>
+    </div>
+  </aside>
+
+  <div class="portal-main">
+    <header class="portal-topbar premium-panel">
+      <div>
+        <span class="section-kicker">JanSetu Workspace</span>
+        <h1>{{ portal_title|default:"Citizen Dashboard" }}</h1>
+        <p class="small-muted">{{ portal_subtitle|default:"Navigate your scheme journey with clear next actions." }}</p>
+      </div>
+      <div class="portal-topbar-actions">
+        {% block portal_actions %}
+        <a href="{% url 'chat' %}?lang={{ current_lang }}" class="btn btn-orange px-4 py-2">Ask AI</a>
+        {% endblock %}
+      </div>
+    </header>
+
+    <div class="portal-content-stack">
+      {% block portal_content %}{% endblock %}
+    </div>
+  </div>
+</section>
+
+<nav class="mobile-portal-tabs" aria-label="Mobile dashboard tabs">
+  <a href="{% url 'citizen_dashboard' %}?lang={{ current_lang }}"><i class="bi bi-house-fill"></i><span>Home</span></a>
+  <a href="{% url 'citizen_profile' %}?lang={{ current_lang }}"><i class="bi bi-person-circle"></i><span>Profile</span></a>
+  <a href="{% url 'schemes' %}?lang={{ current_lang }}"><i class="bi bi-list-ul"></i><span>Schemes</span></a>
+  <a href="{% url 'citizen_applications' %}?lang={{ current_lang }}&status=under_review"><i class="bi bi-file-earmark-check"></i><span>Applied</span></a>
+  <a href="{% url 'support' %}?lang={{ current_lang }}"><i class="bi bi-chat-left-text"></i><span>Help</span></a>
+</nav>
+{% endblock %}

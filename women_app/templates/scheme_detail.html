@@ -5,6 +5,23 @@
 {% block body_class %}page-detail{% endblock %}
 
 {% block content %}
+{% if scheme.verification_status == "broken" or scheme.verification_status == "stale" %}
+<section class="alert alert-danger mahadbt-alert">
+  <strong>Important notice:</strong> This scheme record may need review. Please verify details on the official department website before applying.
+</section>
+{% endif %}
+
+<section class="alert alert-warning mahadbt-alert mahadbt-info-box">
+  <i class="bi bi-info-circle-fill me-2"></i>
+  Keep all required documents ready before starting the application.
+</section>
+
+{% if scheme.verification_status == "verified" %}
+<section class="alert alert-success mahadbt-alert">
+  <strong>Verified source:</strong> This scheme has a recently verified official source link.
+</section>
+{% endif %}
+
 <section class="detail-hero">
   <div class="detail-hero-copy">
     <span class="section-kicker">{{ t.scheme_details_kicker }}</span>
@@ -42,10 +59,10 @@
 
     <div class="detail-link-list">
       {% for link in detail.quick_links %}
-      <a href="{{ link.url }}" target="_blank" rel="noopener noreferrer" class="btn btn-dark btn-pill detail-link-btn">{{ link.label }}</a>
+      <a href="{{ link.url }}" target="_blank" rel="noopener noreferrer" class="btn btn-success px-4 py-2 detail-link-btn">{{ link.label }}</a>
       {% empty %}
       {% if scheme.url %}
-      <a href="{{ scheme.url }}" target="_blank" rel="noopener noreferrer" class="btn btn-dark btn-pill detail-link-btn">{{ t.open_official_page }}</a>
+      <a href="{{ scheme.url }}" target="_blank" rel="noopener noreferrer" class="btn btn-success px-4 py-2 detail-link-btn">{{ t.open_official_page }}</a>
       {% endif %}
       {% endfor %}
     </div>
@@ -76,7 +93,7 @@
           {% if selected_district %}<option value="{{ selected_district }}" selected>{{ selected_district }}</option>{% endif %}
         </select>
       </label>
-      <button type="submit" class="btn btn-outline-dark btn-pill">Update help center</button>
+      <button type="submit" class="btn btn-primary px-4 py-2">Update help center</button>
       <article class="help-center-card help-center-card-tight" data-help-center-preview>
         <h3>{{ help_center.office_name }}</h3>
         <p class="small-muted">{{ help_center.state }}{% if help_center.district %}, {{ help_center.district }}{% endif %}</p>

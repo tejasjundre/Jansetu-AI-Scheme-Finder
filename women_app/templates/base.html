@@ -4,14 +4,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#eef3ff">
+  <meta name="theme-color" content="#1a3a5c">
   <title>{% block title %}{{ t.brand_name }}{% endblock %}</title>
   <meta name="description" content="{{ t.meta_description }}">
-  <link rel="icon" type="image/png" href="{% static 'img/jan_setu_logo.png' %}">
-  <link rel="apple-touch-icon" href="{% static 'img/jan_setu_logo.png' %}">
+  <link rel="icon" type="image/png" href="{% static 'img/jan_setu_brand_logo.png' %}">
+  <link rel="apple-touch-icon" href="{% static 'img/jan_setu_brand_logo.png' %}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <link rel="stylesheet" href="{% static 'css/main.css' %}">
   <link rel="stylesheet" href="{% static 'css/premium.css' %}">
@@ -23,89 +24,78 @@
   <div class="site-bg layer-1"></div>
   <div class="site-bg layer-2"></div>
   <div class="site-bg layer-3"></div>
-  <div class="ambient-glow ambient-glow-a"></div>
-  <div class="ambient-glow ambient-glow-b"></div>
-  <div class="ambient-glow ambient-glow-c"></div>
-  <div class="ambient-noise"></div>
+  <div class="modern-vector modern-vector-a"></div>
+  <div class="modern-vector modern-vector-b"></div>
+  <div class="modern-vector modern-vector-c"></div>
 
-  <div class="page-shell">
-    <header class="site-header premium-header">
-      <div class="container header-row">
-        <a class="brand-mark" href="{% url 'home' %}" aria-label="{{ t.brand_name }}">
-          <img
-            class="brand-logo"
-            src="{% static 'img/jan_setu_logo.png' %}"
-            alt="{{ t.brand_name }} logo"
-            width="676"
-            height="369"
-            decoding="async"
-            loading="eager"
-          >
-          <span class="brand-text">
-            <strong>{{ t.brand_name }}</strong>
-            <small>{{ t.brand_tagline }}</small>
-          </span>
-        </a>
+  <header class="maha-header">
+    <div class="container maha-header-row">
+      <a class="maha-brand" href="{% url 'home' %}" aria-label="JanSetu AI Sakhi">
+        <img class="maha-brand-image" src="{% static 'img/jan_setu_brand_logo.png' %}" alt="JanSetu logo">
+        <span class="maha-brand-copy">
+          <strong>JanSetu</strong>
+          <small>AI Sakhi</small>
+        </span>
+      </a>
 
+      <div class="maha-header-tools">
+        <label class="language-pill">
+          <span>{{ t.lang_label }}</span>
+          <select id="languageSwitcher" aria-label="{{ t.lang_label }}">
+            {% for code, label in languages.items %}
+            <option value="{{ code }}" {% if code == current_lang %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </label>
         <button
           type="button"
-          class="ghost-btn nav-toggle"
-          id="navToggle"
-          aria-expanded="false"
-          aria-controls="headerPanel"
+          class="btn btn-primary px-3 py-2 theme-icon-btn"
+          data-theme-toggle
+          aria-label="Switch to dark theme"
+          title="Switch to dark theme"
         >
-          Menu
+          <i class="bi bi-sun-fill theme-glyph theme-glyph-sun" aria-hidden="true"></i>
+          <i class="bi bi-moon-stars-fill theme-glyph theme-glyph-moon" aria-hidden="true"></i>
+          <span class="visually-hidden" data-theme-label>Switch to dark theme</span>
         </button>
-
-        <div class="header-panel" id="headerPanel">
-          <nav class="site-nav" id="siteNav">
-            {% if request.user.is_authenticated %}
-            <a href="{% url 'citizen_dashboard' %}?lang={{ current_lang }}">My Dashboard</a>
-            <a href="{% url 'citizen_profile' %}?lang={{ current_lang }}">My Profile</a>
-            {% endif %}
-            <a href="{% url 'wizard' %}?lang={{ current_lang }}">{{ t.nav_wizard }}</a>
-            <a href="{% url 'chat' %}?lang={{ current_lang }}">{{ t.nav_chat }}</a>
-            <a href="{% url 'schemes' %}?lang={{ current_lang }}">{{ t.nav_schemes }}</a>
-            <a href="{% url 'support' %}?lang={{ current_lang }}">{{ t.nav_support }}</a>
-            {% if request.user.is_staff %}
-            <a href="{% url 'ops_dashboard' %}?lang={{ current_lang }}">Ops</a>
-            {% endif %}
-          </nav>
-
-          <div class="header-tools">
-            <label class="language-pill">
-              <span>{{ t.lang_label }}</span>
-              <select id="languageSwitcher" aria-label="{{ t.lang_label }}">
-                {% for code, label in languages.items %}
-                <option value="{{ code }}" {% if code == current_lang %}selected{% endif %}>{{ label }}</option>
-                {% endfor %}
-              </select>
-            </label>
-            <button
-              type="button"
-              class="ghost-btn theme-btn"
-              id="themeToggle"
-              data-theme-toggle
-              aria-label="Switch to dark theme"
-              title="Switch to dark theme"
-            >
-              <i class="bi bi-sun-fill theme-glyph theme-glyph-sun" aria-hidden="true"></i>
-              <i class="bi bi-moon-stars-fill theme-glyph theme-glyph-moon" aria-hidden="true"></i>
-              <span class="visually-hidden" data-theme-label>Switch to dark theme</span>
-            </button>
-            <button type="button" class="ghost-btn comfort-btn" data-comfort-toggle>A+</button>
-            {% if request.user.is_authenticated %}
-            <span class="user-pill">{{ request.user.username }}</span>
-            <a href="{% url 'citizen_logout' %}?lang={{ current_lang }}" class="btn btn-outline-dark btn-pill nav-cta">Logout</a>
-            {% else %}
-            <a href="{% url 'citizen_login' %}?lang={{ current_lang }}" class="btn btn-outline-dark btn-pill nav-cta">Login</a>
-            <a href="{% url 'citizen_register' %}?lang={{ current_lang }}" class="btn btn-dark btn-pill nav-cta">Create account</a>
-            {% endif %}
-          </div>
-        </div>
+        <button type="button" class="btn btn-primary px-4 py-2 comfort-btn" data-comfort-toggle>A+</button>
+        {% if request.user.is_authenticated %}
+        <span class="user-pill">{{ request.user.username }}</span>
+        <a href="{% url 'citizen_logout' %}?lang={{ current_lang }}" class="btn btn-danger px-4 py-2">Logout</a>
+        {% else %}
+        <a href="{% url 'citizen_login' %}?lang={{ current_lang }}" class="btn btn-primary px-4 py-2">Login</a>
+        <a href="{% url 'citizen_register' %}?lang={{ current_lang }}" class="btn btn-success px-4 py-2">Create account</a>
+        {% endif %}
       </div>
-    </header>
+    </div>
+  </header>
 
+  <nav class="maha-top-nav" aria-label="Primary navigation">
+    <div class="container maha-top-nav-inner">
+      <a href="{% url 'home' %}?lang={{ current_lang }}" class="maha-nav-btn{% if request.path == '/' %} is-active{% endif %}">
+        <i class="bi bi-house-fill" aria-hidden="true"></i>
+        <span>Home</span>
+      </a>
+      <a href="{% url 'wizard' %}?lang={{ current_lang }}" class="maha-nav-btn{% if 'wizard' in request.path %} is-active{% endif %}">
+        <i class="bi bi-check-circle-fill" aria-hidden="true"></i>
+        <span>Guided Check</span>
+      </a>
+      <a href="{% url 'chat' %}?lang={{ current_lang }}" class="maha-nav-btn{% if 'chat' in request.path %} is-active{% endif %}">
+        <i class="bi bi-robot" aria-hidden="true"></i>
+        <span>Ask AI</span>
+      </a>
+      <a href="{% url 'schemes' %}?lang={{ current_lang }}" class="maha-nav-btn{% if 'schemes' in request.path or 'scheme/' in request.path %} is-active{% endif %}">
+        <i class="bi bi-list-ul" aria-hidden="true"></i>
+        <span>Schemes</span>
+      </a>
+      <a href="{% url 'support' %}?lang={{ current_lang }}" class="maha-nav-btn{% if 'support' in request.path %} is-active{% endif %}">
+        <i class="bi bi-person-lines-fill" aria-hidden="true"></i>
+        <span>Human Help</span>
+      </a>
+    </div>
+  </nav>
+
+  <div class="page-shell">
     <main class="container page-content" id="mainContent">
       {% block content %}{% endblock %}
     </main>
@@ -114,15 +104,6 @@
   <footer class="site-footer premium-footer">
     <div class="container footer-row">
       <div class="footer-copy">
-        <img
-          class="footer-logo"
-          src="{% static 'img/jan_setu_logo.png' %}"
-          alt="{{ t.brand_name }} logo"
-          width="676"
-          height="369"
-          decoding="async"
-          loading="lazy"
-        >
         <div class="footer-copy-text">
           <strong>{{ t.brand_name }}</strong>
           <span>{{ t.footer_line }}</span>
@@ -136,6 +117,7 @@
   </footer>
 
   {{ t|json_script:"uiStrings" }}
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="{% static 'js/site.js' %}"></script>
   {% block extra_js %}{% endblock %}
 </body>

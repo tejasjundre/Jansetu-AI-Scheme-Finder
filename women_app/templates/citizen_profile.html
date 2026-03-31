@@ -1,142 +1,109 @@
-{% extends 'base.html' %}
+{% extends 'portal_layout.html' %}
+{% load static %}
 
-{% block title %}My Profile | {{ t.brand_name }}{% endblock %}
-{% block body_class %}page-profile{% endblock %}
+{% block portal_body_class %}portal-profile{% endblock %}
 
-{% block content %}
-<section class="account-shell">
-  <aside class="premium-side-panel account-sidebar">
-    <span class="section-kicker">Applicant Panel</span>
-    <h2>{{ request.user.username }}</h2>
-    <p class="small-muted">Applicant ID: JS-{{ request.user.id|stringformat:"05d" }}</p>
+{% block portal_actions %}
+<a href="{% url 'citizen_dashboard' %}?lang={{ current_lang }}" class="btn btn-primary px-4 py-2">Back to Home</a>
+<a href="{% url 'wizard' %}?lang={{ current_lang }}" class="btn btn-primary px-4 py-2">Guided Check</a>
+{% endblock %}
 
-    <nav class="account-nav-list">
-      <a class="account-nav-item" href="{% url 'citizen_dashboard' %}?lang={{ current_lang }}">My Dashboard</a>
-      <a class="account-nav-item is-active" href="{% url 'citizen_profile' %}?lang={{ current_lang }}">Update Profile</a>
-      <a class="account-nav-item" href="{% url 'schemes' %}?lang={{ current_lang }}">All Schemes</a>
-      <a class="account-nav-item" href="{% url 'support' %}?lang={{ current_lang }}">Help Desk</a>
-    </nav>
-
-    <div class="account-side-card">
-      <strong>Profile checklist</strong>
-      <p>1. Age + income</p>
-      <p>2. State + district</p>
-      <p>3. Main support need</p>
-      <p>4. Document readiness</p>
-    </div>
-  </aside>
-
-  <div class="account-main">
-    <section class="premium-panel account-header-panel">
-      <div>
-        <span class="section-kicker">Citizen Profile</span>
-        <h1>Update profile for accurate scheme matching</h1>
-      </div>
-      <div class="account-header-actions">
-        <a href="{% url 'citizen_dashboard' %}?lang={{ current_lang }}" class="btn btn-outline-dark btn-pill">Back to dashboard</a>
-      </div>
-    </section>
-
-    <form method="post" class="premium-form-panel account-profile-form">
-      {% csrf_token %}
-      {{ profile_form.language }}
-
-      {% if profile_saved %}
-      <div class="success-banner">Profile updated successfully.</div>
-      {% endif %}
-
-      <div class="account-form-section">
-        <div class="wizard-step-head">
-          <div>
-            <span class="section-kicker">Section 1</span>
-            <h2>Identity and location</h2>
-          </div>
-          <p>These fields decide state and district-specific eligibility filtering.</p>
-        </div>
-
-        <div class="form-grid two wizard-form-grid">
-          <label class="field-block">
-            <span>{{ profile_form.age.label }}</span>
-            {{ profile_form.age }}
-          </label>
-          <label class="field-block">
-            <span>{{ profile_form.gender.label }}</span>
-            {{ profile_form.gender }}
-          </label>
-          <label class="field-block">
-            <span>{{ profile_form.state.label }}</span>
-            {{ profile_form.state }}
-          </label>
-          <label class="field-block">
-            <span>{{ profile_form.district.label }}</span>
-            {{ profile_form.district }}
-          </label>
-          <label class="field-block">
-            <span>{{ profile_form.residence_type.label }}</span>
-            {{ profile_form.residence_type }}
-          </label>
-        </div>
-      </div>
-
-      <div class="account-form-section">
-        <div class="wizard-step-head">
-          <div>
-            <span class="section-kicker">Section 2</span>
-            <h2>Eligibility and support preferences</h2>
-          </div>
-          <p>These fields improve relevance and reduce non-applicable schemes.</p>
-        </div>
-
-        <div class="form-grid two wizard-form-grid">
-          <label class="field-block">
-            <span>{{ profile_form.annual_income.label }}</span>
-            {{ profile_form.annual_income }}
-          </label>
-          <label class="field-block">
-            <span>{{ profile_form.income_band.label }}</span>
-            {{ profile_form.income_band }}
-          </label>
-          <label class="field-block">
-            <span>{{ profile_form.support_need.label }}</span>
-            {{ profile_form.support_need }}
-          </label>
-          <label class="field-block">
-            <span>{{ profile_form.caste_category.label }}</span>
-            {{ profile_form.caste_category }}
-          </label>
-          <label class="field-block">
-            <span>{{ profile_form.document_readiness.label }}</span>
-            {{ profile_form.document_readiness }}
-          </label>
-        </div>
-      </div>
-
-      <div class="account-form-section">
-        <div class="wizard-step-head">
-          <div>
-            <span class="section-kicker">Section 3</span>
-            <h2>Beneficiary context</h2>
-          </div>
-        </div>
-
-        <div class="toggle-grid premium-toggle-grid">
-          <label class="field-toggle">{{ profile_form.is_student }} <span>{{ profile_form.is_student.label }}</span></label>
-          <label class="field-toggle">{{ profile_form.is_mother }} <span>{{ profile_form.is_mother.label }}</span></label>
-          <label class="field-toggle">{{ profile_form.is_entrepreneur }} <span>{{ profile_form.is_entrepreneur.label }}</span></label>
-          <label class="field-toggle">{{ profile_form.has_disability }} <span>{{ profile_form.has_disability.label }}</span></label>
-        </div>
-
-        <label class="field-block mt-3">
-          <span>{{ profile_form.notes.label }}</span>
-          {{ profile_form.notes }}
-        </label>
-      </div>
-
-      <div class="wizard-actions premium-actions">
-        <button type="submit" class="btn btn-dark btn-pill">Save profile</button>
-        <a href="{% url 'citizen_dashboard' %}?lang={{ current_lang }}" class="btn btn-outline-dark btn-pill">Go to dashboard</a>
-      </div>
-    </form>
-  </div>
+{% block portal_content %}
+{% if profile_saved %}
+<section class="alert alert-success mahadbt-alert">
+  <strong>Profile updated successfully.</strong>
 </section>
+{% endif %}
+
+<section class="alert alert-warning mahadbt-alert mahadbt-info-box">
+  <i class="bi bi-info-circle-fill me-2"></i>
+  Fill all required fields (*) to unlock accurate scheme matching.
+</section>
+
+<form method="post" class="premium-form-panel portal-form mahadbt-form-layout">
+  {% csrf_token %}
+  {{ profile_form.language }}
+
+  <section class="portal-form-section">
+    <h2 class="mahadbt-section-title">Personal Details</h2>
+    <div class="row g-3">
+      <div class="col-md-4">
+        <label class="form-label">{{ profile_form.age.label }} <span class="text-danger">*</span></label>
+        {{ profile_form.age }}
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">{{ profile_form.gender.label }} <span class="text-danger">*</span></label>
+        {{ profile_form.gender }}
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">{{ profile_form.residence_type.label }} <span class="text-danger">*</span></label>
+        {{ profile_form.residence_type }}
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">{{ profile_form.state.label }} <span class="text-danger">*</span></label>
+        {{ profile_form.state }}
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">{{ profile_form.district.label }} <span class="text-danger">*</span></label>
+        {{ profile_form.district }}
+      </div>
+    </div>
+  </section>
+
+  <section class="portal-form-section">
+    <h2 class="mahadbt-section-title">Income Details</h2>
+    <div class="row g-3">
+      <div class="col-md-4">
+        <label class="form-label">{{ profile_form.annual_income.label }} <span class="text-danger">*</span></label>
+        {{ profile_form.annual_income }}
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">{{ profile_form.income_band.label }} <span class="text-danger">*</span></label>
+        {{ profile_form.income_band }}
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">{{ profile_form.support_need.label }} <span class="text-danger">*</span></label>
+        {{ profile_form.support_need }}
+      </div>
+    </div>
+  </section>
+
+  <section class="portal-form-section">
+    <h2 class="mahadbt-section-title">Caste Details</h2>
+    <div class="row g-3">
+      <div class="col-md-4">
+        <label class="form-label">{{ profile_form.caste_category.label }} <span class="text-danger">*</span></label>
+        {{ profile_form.caste_category }}
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">{{ profile_form.document_readiness.label }} <span class="text-danger">*</span></label>
+        {{ profile_form.document_readiness }}
+      </div>
+    </div>
+  </section>
+
+  <section class="portal-form-section">
+    <h2 class="mahadbt-section-title">Beneficiary Context</h2>
+    <div class="row g-3">
+      <div class="col-md-4"><label class="field-toggle">{{ profile_form.is_student }} <span>{{ profile_form.is_student.label }}</span></label></div>
+      <div class="col-md-4"><label class="field-toggle">{{ profile_form.is_mother }} <span>{{ profile_form.is_mother.label }}</span></label></div>
+      <div class="col-md-4"><label class="field-toggle">{{ profile_form.is_entrepreneur }} <span>{{ profile_form.is_entrepreneur.label }}</span></label></div>
+      <div class="col-md-4"><label class="field-toggle">{{ profile_form.has_disability }} <span>{{ profile_form.has_disability.label }}</span></label></div>
+      <div class="col-md-8">
+        <label class="form-label">{{ profile_form.notes.label }}</label>
+        {{ profile_form.notes }}
+      </div>
+    </div>
+  </section>
+
+  <div class="portal-form-actions">
+    <button type="submit" class="btn btn-success px-4 py-2">Save</button>
+    <a href="{% url 'citizen_profile' %}?lang={{ current_lang }}" class="btn btn-danger px-4 py-2">Reset</a>
+  </div>
+</form>
+{% endblock %}
+
+{% block extra_js %}
+{{ district_map|json_script:"districtData" }}
+<script src="{% static 'js/location.js' %}"></script>
 {% endblock %}

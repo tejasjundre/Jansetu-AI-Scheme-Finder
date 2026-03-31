@@ -13,14 +13,43 @@ class Command(BaseCommand):
             action="store_true",
             help="Seed only when the Scheme table is empty.",
         )
+        parser.add_argument(
+            "--min-count",
+            type=int,
+            default=None,
+            help="Seed when existing Scheme count is below this threshold.",
+        )
 
     def handle(self, *args, **options):
-        if options.get("if_empty") and Scheme.objects.exists():
-            self.stdout.write(self.style.WARNING("Scheme table already has data. Skipping seed."))
+        existing_count = Scheme.objects.count()
+        min_count = options.get("min_count")
+
+        if options.get("if_empty") and existing_count > 0:
+            self.stdout.write(
+                self.style.WARNING(
+                    f"Scheme table already has {existing_count} records. Skipping seed (--if-empty)."
+                )
+            )
             return
+
+        if min_count is not None and existing_count >= min_count:
+            self.stdout.write(
+                self.style.WARNING(
+                    f"Scheme table has {existing_count} records (>= {min_count}). Skipping seed."
+                )
+            )
+            return
+
+        if min_count is not None and existing_count < min_count:
+            self.stdout.write(
+                self.style.WARNING(
+                    f"Scheme table has only {existing_count} records (< {min_count}). Running seed."
+                )
+            )
 
         processed = 0
         created_count = 0
+        updated_count = 0
         for record in load_seed_schemes():
             _, created = Scheme.objects.update_or_create(
                 name=record["name"],
@@ -51,9 +80,11 @@ class Command(BaseCommand):
             processed += 1
             if created:
                 created_count += 1
+            else:
+                updated_count += 1
 
         self.stdout.write(
             self.style.SUCCESS(
-                f"Processed {processed} schemes and created {created_count} new records."
+                f"Processed {processed} schemes. Created {created_count}, updated {updated_count}."
             )
         )

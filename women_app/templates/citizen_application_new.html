@@ -1,0 +1,130 @@
+{% extends 'portal_layout.html' %}
+{% load static %}
+
+{% block portal_body_class %}portal-application-new{% endblock %}
+
+{% block portal_actions %}
+<a href="{% url 'citizen_applications' %}?lang={{ current_lang }}&status=under_review" class="btn btn-primary px-4 py-2">My Applications</a>
+{% endblock %}
+
+{% block portal_content %}
+<section class="premium-panel app-flow-panel" data-application-flow data-initial-step="1">
+  <div class="app-flow-header">
+    <h2>Submit New Application</h2>
+    <p class="small-muted">A guided flow with only relevant fields at each step.</p>
+  </div>
+
+  <div class="app-flow-steps">
+    <button type="button" class="app-step-chip is-active" data-app-trigger="1">1. Scheme</button>
+    <button type="button" class="app-step-chip" data-app-trigger="2">2. Eligibility</button>
+    <button type="button" class="app-step-chip" data-app-trigger="3">3. Documents</button>
+  </div>
+
+  <form method="post" enctype="multipart/form-data" id="applicationForm">
+    {% csrf_token %}
+
+    {% if application_form.non_field_errors %}
+    <div class="field-error-block">
+      {% for err in application_form.non_field_errors %}
+      <div>{{ err }}</div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="app-step-pane is-active" data-app-step="1">
+      <div class="portal-form-section">
+        <div class="portal-section-head">
+          <span class="section-kicker">Step 1</span>
+          <h3>Select scheme</h3>
+          <p>Pick from recommended schemes or type manually.</p>
+        </div>
+
+        {% if recommended_schemes %}
+        <div class="scheme-choice-grid">
+          {% for scheme in recommended_schemes|slice:":8" %}
+          <button type="button" class="scheme-choice-chip" data-scheme-choice="{{ scheme.name }}">{{ scheme.name }}</button>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        <label class="field-block mt-3">
+          <span>{{ application_form.scheme_name.label }}</span>
+          {{ application_form.scheme_name }}
+          {% if application_form.scheme_name.errors %}<small class="field-error">{{ application_form.scheme_name.errors.0 }}</small>{% endif %}
+        </label>
+      </div>
+    </div>
+
+    <div class="app-step-pane" data-app-step="2">
+      <div class="portal-form-section">
+        <div class="portal-section-head">
+          <span class="section-kicker">Step 2</span>
+          <h3>Eligibility and basic details</h3>
+          <p>Use exact details for faster verification.</p>
+        </div>
+
+        <div class="form-grid two wizard-form-grid">
+          <label class="field-block">
+            <span>{{ application_form.aadhaar_number.label }}</span>
+            {{ application_form.aadhaar_number }}
+            {% if application_form.aadhaar_number.errors %}<small class="field-error">{{ application_form.aadhaar_number.errors.0 }}</small>{% endif %}
+          </label>
+          <label class="field-block">
+            <span>{{ application_form.bank_account.label }}</span>
+            {{ application_form.bank_account }}
+            {% if application_form.bank_account.errors %}<small class="field-error">{{ application_form.bank_account.errors.0 }}</small>{% endif %}
+          </label>
+          <label class="field-block">
+            <span>{{ application_form.annual_income.label }}</span>
+            {{ application_form.annual_income }}
+            {% if application_form.annual_income.errors %}<small class="field-error">{{ application_form.annual_income.errors.0 }}</small>{% endif %}
+          </label>
+          <label class="field-block">
+            <span>{{ application_form.caste_category.label }}</span>
+            {{ application_form.caste_category }}
+            {% if application_form.caste_category.errors %}<small class="field-error">{{ application_form.caste_category.errors.0 }}</small>{% endif %}
+          </label>
+          <label class="field-block">
+            <span>{{ application_form.education_level.label }}</span>
+            {{ application_form.education_level }}
+            {% if application_form.education_level.errors %}<small class="field-error">{{ application_form.education_level.errors.0 }}</small>{% endif %}
+          </label>
+        </div>
+
+        <label class="field-block mt-3">
+          <span>{{ application_form.notes.label }}</span>
+          {{ application_form.notes }}
+          {% if application_form.notes.errors %}<small class="field-error">{{ application_form.notes.errors.0 }}</small>{% endif %}
+        </label>
+      </div>
+    </div>
+
+    <div class="app-step-pane" data-app-step="3">
+      <div class="portal-form-section">
+        <div class="portal-section-head">
+          <span class="section-kicker">Step 3</span>
+          <h3>Upload documents</h3>
+          <p>You can upload now and add more later from the Documents section.</p>
+        </div>
+
+        <label class="field-block">
+          <span>Upload files</span>
+          <input type="file" name="documents" id="documentsInput" multiple>
+        </label>
+
+        <div id="documentPreview" class="upload-preview-list"></div>
+      </div>
+    </div>
+
+    <div class="app-flow-actions">
+      <button type="button" class="btn btn-danger px-4 py-2" id="appBack">Previous</button>
+      <button type="button" class="btn btn-primary px-4 py-2" id="appNext">Next</button>
+      <button type="submit" class="btn btn-success px-4 py-2 d-none" id="appSubmit">Submit Application</button>
+    </div>
+  </form>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/portal_application_flow.js' %}"></script>
+{% endblock %}

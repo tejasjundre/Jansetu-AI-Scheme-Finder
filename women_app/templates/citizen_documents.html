@@ -1,0 +1,56 @@
+{% extends 'portal_layout.html' %}
+
+{% block portal_body_class %}portal-documents{% endblock %}
+
+{% block portal_actions %}
+<a href="{% url 'citizen_application_new' %}?lang={{ current_lang }}" class="btn btn-success px-4 py-2">Upload Through New Application</a>
+{% endblock %}
+
+{% block portal_content %}
+<section class="premium-panel portal-tab-panel">
+  <div class="portal-tab-header">
+    <h2>Document Verification</h2>
+    <p class="small-muted">Keep files organized and track verification status.</p>
+  </div>
+
+  <div class="portal-tab-list">
+    <a href="{% url 'citizen_documents' %}?lang={{ current_lang }}&status=pending" class="portal-tab-link{% if selected_status == 'pending' %} is-active{% endif %}">
+      Pending <span>{{ document_counts.pending|default:0 }}</span>
+    </a>
+    <a href="{% url 'citizen_documents' %}?lang={{ current_lang }}&status=verified" class="portal-tab-link{% if selected_status == 'verified' %} is-active{% endif %}">
+      Verified <span>{{ document_counts.verified|default:0 }}</span>
+    </a>
+    <a href="{% url 'citizen_documents' %}?lang={{ current_lang }}&status=rejected" class="portal-tab-link{% if selected_status == 'rejected' %} is-active{% endif %}">
+      Rejected <span>{{ document_counts.rejected|default:0 }}</span>
+    </a>
+    <a href="{% url 'citizen_documents' %}?lang={{ current_lang }}&status=all" class="portal-tab-link{% if selected_status == 'all' %} is-active{% endif %}">
+      All <span>{{ document_counts.all|default:0 }}</span>
+    </a>
+  </div>
+</section>
+
+<section class="portal-card-list">
+  {% for doc in documents %}
+  <article class="premium-panel portal-record-card">
+    <div class="portal-record-head">
+      <div>
+        <span class="panel-label">{{ doc.document_type }}</span>
+        <h3>{{ doc.file_name }}</h3>
+      </div>
+      <span class="status-badge status-{{ doc.verification_status }}">{{ doc.get_verification_status_display }}</span>
+    </div>
+    <div class="portal-record-meta">
+      <span><strong>Size:</strong> {{ doc.file_size_kb }} KB</span>
+      <span><strong>Uploaded:</strong> {{ doc.uploaded_at|date:"d M Y, h:i A" }}</span>
+      <span><strong>Application:</strong> {{ doc.application.application_id|default:"Not linked" }}</span>
+    </div>
+  </article>
+  {% empty %}
+  <div class="empty-panel">
+    <h3>No documents found for this status</h3>
+    <p>Upload documents while creating a new application.</p>
+    <a href="{% url 'citizen_application_new' %}?lang={{ current_lang }}" class="btn btn-success px-4 py-2">Start Application</a>
+  </div>
+  {% endfor %}
+</section>
+{% endblock %}

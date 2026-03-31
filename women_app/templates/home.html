@@ -14,15 +14,15 @@
     </div>
 
     <div class="hero-actions">
-      <a href="{% url 'wizard' %}?lang={{ current_lang }}" class="btn btn-dark btn-pill">{{ t.hero_primary }}</a>
-      <a href="{% url 'chat' %}?lang={{ current_lang }}" class="btn btn-outline-dark btn-pill">{{ t.nav_chat }}</a>
+      <a href="{% url 'wizard' %}?lang={{ current_lang }}" class="btn btn-primary px-4 py-2">{{ t.hero_primary }}</a>
+      <a href="{% url 'chat' %}?lang={{ current_lang }}" class="btn btn-orange px-4 py-2">{{ t.nav_chat }}</a>
       <a href="{% url 'schemes' %}?lang={{ current_lang }}" class="text-link hero-text-link">{{ t.hero_secondary }}</a>
     </div>
 
     <form method="get" action="{% url 'schemes' %}" class="hero-search premium-command-bar">
       <input type="hidden" name="lang" value="{{ current_lang }}">
       <input type="text" name="q" placeholder="{{ t.home_search_placeholder }}" aria-label="{{ t.home_search_label }}">
-      <button type="submit" class="btn btn-dark btn-pill">{{ t.home_search_label }}</button>
+      <button type="submit" class="btn btn-primary px-4 py-2">{{ t.home_search_label }}</button>
     </form>
 
     <div class="hero-proof-grid">
@@ -66,8 +66,8 @@
         <li>Switch to voice anytime for Hindi, Marathi, or English guidance.</li>
       </ul>
       <div class="spotlight-actions">
-        <a href="{% url 'wizard' %}?lang={{ current_lang }}" class="btn btn-dark btn-pill">{{ t.hero_primary }}</a>
-        <a href="{% url 'support' %}?lang={{ current_lang }}" class="btn btn-outline-dark btn-pill">{{ t.nav_support }}</a>
+        <a href="{% url 'wizard' %}?lang={{ current_lang }}" class="btn btn-primary px-4 py-2">{{ t.hero_primary }}</a>
+        <a href="{% url 'support' %}?lang={{ current_lang }}" class="btn btn-primary px-4 py-2">{{ t.nav_support }}</a>
       </div>
     </article>
 
@@ -223,9 +223,9 @@
 
       <div class="result-actions">
         {% if scheme.slug %}
-        <a href="{% url 'scheme_detail' scheme.slug %}?lang={{ current_lang }}" class="btn btn-dark btn-pill">{{ t.chat_open_details }}</a>
+        <a href="{% url 'scheme_detail' scheme.slug %}?lang={{ current_lang }}" class="btn btn-primary px-4 py-2">{{ t.chat_open_details }}</a>
         {% elif scheme.url %}
-        <a href="{{ scheme.url }}" target="_blank" rel="noopener noreferrer" class="btn btn-dark btn-pill">{{ t.open_official_page }}</a>
+        <a href="{{ scheme.url }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary px-4 py-2">{{ t.open_official_page }}</a>
         {% endif %}
       </div>
     </article>

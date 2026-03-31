@@ -1,0 +1,69 @@
+{% extends 'portal_layout.html' %}
+
+{% block portal_body_class %}portal-applications{% endblock %}
+
+{% block portal_actions %}
+<a href="{% url 'citizen_application_new' %}?lang={{ current_lang }}" class="btn btn-success px-4 py-2">New Application</a>
+{% endblock %}
+
+{% block portal_content %}
+{% if request.GET.submitted == "1" %}
+<div class="success-banner">Application submitted successfully. It is now under review.</div>
+{% endif %}
+
+<section class="premium-panel portal-tab-panel">
+  <div class="portal-tab-header">
+    <h2>Application Status</h2>
+    <p class="small-muted">Track current, approved, and rejected submissions in one place.</p>
+  </div>
+
+  <div class="portal-tab-list">
+    <a href="{% url 'citizen_applications' %}?lang={{ current_lang }}&status=under_review" class="portal-tab-link{% if selected_status == 'under_review' %} is-active{% endif %}">
+      Under Review <span>{{ application_counts.under_review|default:0 }}</span>
+    </a>
+    <a href="{% url 'citizen_applications' %}?lang={{ current_lang }}&status=approved" class="portal-tab-link{% if selected_status == 'approved' %} is-active{% endif %}">
+      Approved <span>{{ application_counts.approved|default:0 }}</span>
+    </a>
+    <a href="{% url 'citizen_applications' %}?lang={{ current_lang }}&status=rejected" class="portal-tab-link{% if selected_status == 'rejected' %} is-active{% endif %}">
+      Rejected <span>{{ application_counts.rejected|default:0 }}</span>
+    </a>
+  </div>
+</section>
+
+<section class="portal-card-list">
+  {% for app in applications %}
+  <article class="premium-panel portal-record-card">
+    <div class="portal-record-head">
+      <div>
+        <span class="panel-label">{{ app.application_id }}</span>
+        <h3>{{ app.scheme_name }}</h3>
+      </div>
+      <span class="status-badge status-{{ app.status }}">{{ app.get_status_display }}</span>
+    </div>
+
+    <div class="portal-record-meta">
+      <span><strong>Submitted:</strong> {{ app.submitted_at|date:"d M Y, h:i A" }}</span>
+      <span><strong>Updated:</strong> {{ app.updated_at|date:"d M Y, h:i A" }}</span>
+      <span><strong>Documents:</strong> {{ app.documents.count }}</span>
+    </div>
+
+    {% if app.ai_summary %}
+    <div class="portal-ai-summary">
+      <strong>AI Summary</strong>
+      <p>{{ app.ai_summary }}</p>
+    </div>
+    {% endif %}
+
+    {% if app.notes %}
+    <p class="small-muted">{{ app.notes }}</p>
+    {% endif %}
+  </article>
+  {% empty %}
+  <div class="empty-panel">
+    <h3>No applications in this status yet</h3>
+    <p>Start your first application to begin tracking progress.</p>
+    <a href="{% url 'citizen_application_new' %}?lang={{ current_lang }}" class="btn btn-success px-4 py-2">Start Application</a>
+  </div>
+  {% endfor %}
+</section>
+{% endblock %}

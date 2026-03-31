@@ -33,7 +33,7 @@ This repo includes `render.yaml` for one-click deployment.
 4. After deploy, open the generated Render URL in browser.
 
 No Render Shell is required for first launch.
-The app now runs migrations and seeds schemes automatically on startup when the database is empty.
+The app now runs migrations and auto-seeds schemes on startup whenever scheme count is below the baseline threshold.
 
 If your Render app name is different, update:
 - `ALLOWED_HOSTS`

@@ -25,7 +25,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (themeMeta) {
-      themeMeta.setAttribute("content", normalized === "dark" ? "#091120" : "#eef3ff");
+      themeMeta.setAttribute("content", normalized === "dark" ? "#0f2238" : "#1a3a5c");
     }
   }
 

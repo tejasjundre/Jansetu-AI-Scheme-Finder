@@ -16,6 +16,11 @@
   </div>
 </section>
 
+<section class="alert alert-warning mahadbt-alert mahadbt-info-box">
+  <i class="bi bi-info-circle-fill me-2"></i>
+  Fill required profile details carefully. Better inputs give better eligibility matches.
+</section>
+
 <section class="wizard-layout premium-wizard-layout">
   <form
     method="post"
@@ -178,13 +183,22 @@
           {{ wizard_form.notes }}
           {% if wizard_form.notes.errors %}<small class="field-error">{{ wizard_form.notes.errors.0 }}</small>{% endif %}
         </label>
+
+        <div class="field-block mt-3">
+          <span>Document upload (optional)</span>
+          <div class="input-group">
+            <input type="file" class="form-control" id="wizardDocumentUpload">
+            <button type="button" class="btn btn-orange px-4 py-2">Upload</button>
+          </div>
+          <small class="text-muted">You can upload now or upload later in My Documents.</small>
+        </div>
       </div>
     </div>
 
     <div class="wizard-actions premium-actions">
-      <button type="button" class="btn btn-outline-dark btn-pill" id="wizardBack">{{ t.previous }}</button>
-      <button type="button" class="btn btn-outline-dark btn-pill" id="wizardNext">{{ t.next }}</button>
-      <button type="submit" class="btn btn-dark btn-pill d-none" id="wizardSubmit">{{ t.wizard_submit }}</button>
+      <button type="button" class="btn btn-danger px-4 py-2" id="wizardBack">{{ t.previous }}</button>
+      <button type="button" class="btn btn-primary px-4 py-2" id="wizardNext">{{ t.next }}</button>
+      <button type="submit" class="btn btn-success px-4 py-2 d-none" id="wizardSubmit">{{ t.wizard_submit }}</button>
     </div>
   </form>
 
@@ -209,7 +223,7 @@
     </div>
 
     <div class="side-cta-stack">
-      <a href="{% url 'chat' %}?lang={{ current_lang }}" class="btn btn-outline-dark btn-pill sidecard-cta">{{ t.use_voice_chat }}</a>
+      <a href="{% url 'chat' %}?lang={{ current_lang }}" class="btn btn-orange px-4 py-2 sidecard-cta">{{ t.use_voice_chat }}</a>
       <a href="{% url 'support' %}?lang={{ current_lang }}" class="text-link">{{ t.support_request_link }}</a>
     </div>
   </aside>
@@ -280,11 +294,11 @@
 
       <div class="result-actions">
         {% if scheme.slug %}
-        <a href="{% url 'scheme_detail' scheme.slug %}?lang={{ current_lang }}" class="btn btn-dark btn-pill">{{ t.chat_open_details }}</a>
+        <a href="{% url 'scheme_detail' scheme.slug %}?lang={{ current_lang }}" class="btn btn-primary px-4 py-2">{{ t.chat_open_details }}</a>
         {% elif scheme.url %}
-        <a href="{{ scheme.url }}" target="_blank" rel="noopener noreferrer" class="btn btn-dark btn-pill">{{ t.open_official_page }}</a>
+        <a href="{{ scheme.url }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary px-4 py-2">{{ t.open_official_page }}</a>
         {% endif %}
-        <button type="button" class="btn btn-outline-dark btn-pill speak-block" data-speak="{{ scheme.name }}. {{ scheme.next_steps.where_to_apply }}">
+        <button type="button" class="btn btn-orange px-4 py-2 speak-block" data-speak="{{ scheme.name }}. {{ scheme.next_steps.where_to_apply }}">
           {{ t.voice_read }}
         </button>
       </div>
@@ -294,7 +308,7 @@
   {% else %}
   <div class="empty-panel">
     <h3>{{ t.wizard_empty }}</h3>
-    <a href="{% url 'support' %}?lang={{ current_lang }}" class="btn btn-dark btn-pill">{{ t.nav_support }}</a>
+    <a href="{% url 'support' %}?lang={{ current_lang }}" class="btn btn-primary px-4 py-2">{{ t.nav_support }}</a>
   </div>
   {% endif %}
 </section>

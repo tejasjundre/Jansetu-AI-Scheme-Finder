@@ -22,11 +22,14 @@ from .ai_logic import ai_chat_response, recommendation_names_from_response
 from .eligibility import (
     available_categories,
     create_assessment_from_form,
+    filter_by_profile_completeness,
     filter_schemes,
     get_all_schemes,
+    profile_completeness_report,
     recommend_schemes_from_profile,
 )
 from .forms import (
+    ApplicationSubmissionForm,
     CitizenLoginForm,
     CitizenProfileForm,
     CitizenRegisterForm,
@@ -38,7 +41,16 @@ from .forms import (
 from .help_centers import find_help_centers, get_best_help_center
 from .localization import SUPPORTED_LANGUAGES, get_content_list, get_ui_strings
 from .location_data import get_state_district_map
-from .models import AuditLog, ChatHistory, CitizenProfile, EligibilityAssessment, EscalationRequest, Scheme
+from .models import (
+    AuditLog,
+    ChatHistory,
+    CitizenApplication,
+    CitizenDocument,
+    CitizenProfile,
+    EligibilityAssessment,
+    EscalationRequest,
+    Scheme,
+)
 from .myscheme_api import fetch_scheme_detail
 from .news_feed import get_launch_news
 from .voice_utils import synthesize_speech_mp3, transcribe_audio_upload
@@ -76,6 +88,34 @@ def _serialize_chat_scheme(scheme):
         "where_to_apply": scheme["next_steps"]["where_to_apply"] if scheme.get("next_steps") else "",
         "helpline": scheme["next_steps"]["helpline"] if scheme.get("next_steps") else "",
     }
+
+
+def _portal_context(profile, active_key, title, subtitle):
+    pending_apps = profile.applications.filter(status="under_review").count()
+    pending_docs = profile.documents.filter(verification_status="pending").count()
+    return {
+        "portal_active": active_key,
+        "portal_title": title,
+        "portal_subtitle": subtitle,
+        "portal_notification_count": pending_apps + pending_docs,
+        "portal_pending_apps": pending_apps,
+        "portal_pending_docs": pending_docs,
+    }
+
+
+def _guess_document_type(file_name: str) -> str:
+    lowered = str(file_name or "").lower()
+    if "aadhaar" in lowered:
+        return "Aadhaar Card"
+    if "income" in lowered:
+        return "Income Certificate"
+    if "caste" in lowered:
+        return "Caste Certificate"
+    if "mark" in lowered or "result" in lowered:
+        return "Education Proof"
+    if "bank" in lowered or "passbook" in lowered:
+        return "Bank Document"
+    return "Supporting Document"
 
 
 def _get_or_create_citizen_profile(user, lang):
@@ -264,6 +304,12 @@ def citizen_profile(request):
                 "profile_form": form,
                 "profile_saved": success,
                 "need_focus_options": get_content_list("need_focus_options", lang),
+                **_portal_context(
+                    profile,
+                    "profile",
+                    "Profile & Eligibility Inputs",
+                    "Keep your details updated for accurate scheme eligibility matching.",
+                ),
             },
         ),
     )
@@ -274,8 +320,21 @@ def citizen_dashboard(request):
     lang = get_current_language(request)
     profile = _get_or_create_citizen_profile(request.user, lang)
     profile_data = profile.to_recommendation_input()
-    recommendations = recommend_schemes_from_profile(profile_data, limit=12)
-    profile_incomplete = not profile.state or not profile.support_need or profile.age is None
+    profile_completeness = profile_completeness_report(profile)
+    recommendations = recommend_schemes_from_profile(profile_data, limit=48)
+    recommendations = filter_by_profile_completeness(profile, recommendations)
+
+    if not profile_completeness["is_gate_open"]:
+        recommendations = []
+        profile_gate_state = "blocked"
+    elif profile_completeness["is_full"]:
+        recommendations = recommendations[:16]
+        profile_gate_state = "full"
+    else:
+        recommendations = recommendations[:10]
+        profile_gate_state = "partial"
+
+    profile_incomplete = profile_completeness["percent"] < 100
 
     return render(
         request,
@@ -286,6 +345,159 @@ def citizen_dashboard(request):
                 "profile": profile,
                 "profile_incomplete": profile_incomplete,
                 "recommendations": recommendations,
+                "profile_completeness": profile_completeness,
+                "profile_gate_state": profile_gate_state,
+                "application_counts": {
+                    "under_review": profile.applications.filter(status="under_review").count(),
+                    "approved": profile.applications.filter(status="approved").count(),
+                    "rejected": profile.applications.filter(status="rejected").count(),
+                },
+                **_portal_context(
+                    profile,
+                    "dashboard",
+                    "Citizen Dashboard",
+                    "See profile-based schemes, application statuses, and quick next steps.",
+                ),
+            },
+        ),
+    )
+
+
+@ensure_csrf_cookie
+@login_required(login_url="/login/")
+def citizen_applications(request):
+    lang = get_current_language(request)
+    profile = _get_or_create_citizen_profile(request.user, lang)
+    status_tab = (request.GET.get("status") or "under_review").strip().lower()
+    if status_tab not in {"under_review", "approved", "rejected"}:
+        status_tab = "under_review"
+
+    applications = profile.applications.all()
+    filtered = applications.filter(status=status_tab)
+    counts = {
+        "under_review": applications.filter(status="under_review").count(),
+        "approved": applications.filter(status="approved").count(),
+        "rejected": applications.filter(status="rejected").count(),
+    }
+
+    return render(
+        request,
+        "citizen_applications.html",
+        build_context(
+            request,
+            {
+                "applications": filtered[:80],
+                "selected_status": status_tab,
+                "application_counts": counts,
+                "profile": profile,
+                **_portal_context(
+                    profile,
+                    "applications",
+                    "My Applications",
+                    "Track scholarship and scheme submissions with clean status cards.",
+                ),
+            },
+        ),
+    )
+
+
+@ensure_csrf_cookie
+@login_required(login_url="/login/")
+def citizen_application_new(request):
+    lang = get_current_language(request)
+    profile = _get_or_create_citizen_profile(request.user, lang)
+    recommended = recommend_schemes_from_profile(profile.to_recommendation_input(), limit=10)
+
+    if request.method == "POST":
+        form = ApplicationSubmissionForm(request.POST)
+        if form.is_valid():
+            app = CitizenApplication.objects.create(
+                profile=profile,
+                scheme_name=form.cleaned_data["scheme_name"],
+                status="under_review",
+                notes=form.cleaned_data.get("notes", ""),
+                ai_summary=(
+                    f"Auto profile match: {profile.state or 'State not set'} | "
+                    f"{profile.support_need or 'Need not set'} | income band {profile.income_band}"
+                ),
+            )
+
+            uploaded_files = request.FILES.getlist("documents")
+            for uploaded in uploaded_files:
+                CitizenDocument.objects.create(
+                    profile=profile,
+                    application=app,
+                    document_type=_guess_document_type(uploaded.name),
+                    file_name=uploaded.name,
+                    file_size_kb=max(1, round(uploaded.size / 1024)),
+                )
+
+            return redirect(f"{reverse('citizen_applications')}?lang={lang}&status=under_review&submitted=1")
+    else:
+        form = ApplicationSubmissionForm(
+            initial={
+                "annual_income": profile.annual_income or 0,
+                "caste_category": profile.caste_category,
+                "notes": profile.notes,
+                "scheme_name": recommended[0]["name"] if recommended else "",
+            }
+        )
+
+    return render(
+        request,
+        "citizen_application_new.html",
+        build_context(
+            request,
+            {
+                "application_form": form,
+                "recommended_schemes": recommended,
+                "profile": profile,
+                **_portal_context(
+                    profile,
+                    "applications",
+                    "New Application",
+                    "Step-by-step flow with AI guidance and document validation support.",
+                ),
+            },
+        ),
+    )
+
+
+@ensure_csrf_cookie
+@login_required(login_url="/login/")
+def citizen_documents(request):
+    lang = get_current_language(request)
+    profile = _get_or_create_citizen_profile(request.user, lang)
+    status_tab = (request.GET.get("status") or "pending").strip().lower()
+    if status_tab not in {"pending", "verified", "rejected", "all"}:
+        status_tab = "pending"
+
+    documents = profile.documents.all()
+    filtered = documents if status_tab == "all" else documents.filter(verification_status=status_tab)
+
+    counts = {
+        "pending": documents.filter(verification_status="pending").count(),
+        "verified": documents.filter(verification_status="verified").count(),
+        "rejected": documents.filter(verification_status="rejected").count(),
+        "all": documents.count(),
+    }
+
+    return render(
+        request,
+        "citizen_documents.html",
+        build_context(
+            request,
+            {
+                "documents": filtered[:120],
+                "selected_status": status_tab,
+                "document_counts": counts,
+                "profile": profile,
+                **_portal_context(
+                    profile,
+                    "documents",
+                    "My Documents",
+                    "Manage uploaded files and document verification status in one place.",
+                ),
             },
         ),
     )
@@ -373,14 +585,30 @@ def schemes(request):
     sort = request.GET.get("sort", "recommended").strip() or "recommended"
     personalized_mode = False
     profile = None
+    profile_completeness = None
+    profile_gate_state = ""
     if request.user.is_authenticated:
         profile = getattr(request.user, "citizen_profile", None)
+        if profile:
+            profile_completeness = profile_completeness_report(profile)
+            if profile_completeness["is_full"]:
+                profile_gate_state = "full"
+            elif profile_completeness["is_gate_open"]:
+                profile_gate_state = "partial"
+            else:
+                profile_gate_state = "blocked"
 
     if profile and not query and not category and not state and sort == "recommended":
         scheme_records = recommend_schemes_from_profile(profile.to_recommendation_input(), limit=240)
         personalized_mode = True
     else:
         scheme_records = filter_schemes(query=query, category=category, state=state, sort=sort)
+
+    if profile and profile_completeness:
+        if not profile_completeness["is_gate_open"]:
+            scheme_records = []
+        else:
+            scheme_records = filter_by_profile_completeness(profile, scheme_records)
 
     paginator = Paginator(scheme_records, 24)
     page_obj = paginator.get_page(request.GET.get("page") or 1)
@@ -400,6 +628,8 @@ def schemes(request):
                 "state_options": [state for state, _ in INDIA_STATES if state != "All India"],
                 "scheme_total": paginator.count,
                 "personalized_mode": personalized_mode,
+                "profile_completeness": profile_completeness,
+                "profile_gate_state": profile_gate_state,
             },
         ),
     )

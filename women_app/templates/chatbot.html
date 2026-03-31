@@ -42,8 +42,8 @@
             <option value="mr" {% if current_lang == "mr" %}selected{% endif %}>Marathi</option>
           </select>
         </label>
-        <button type="button" class="ghost-btn voice-pulse-btn" id="micBtn">{{ t.voice_listen }}</button>
-        <button type="button" class="ghost-btn" id="voiceToggle">{{ t.voice_read }}</button>
+        <button type="button" class="btn btn-orange px-4 py-2 voice-pulse-btn" id="micBtn">{{ t.voice_listen }}</button>
+        <button type="button" class="btn btn-primary px-4 py-2" id="voiceToggle">{{ t.voice_read }}</button>
       </div>
     </div>
 
@@ -59,7 +59,7 @@
 
     <div class="chat-input premium-chat-input">
       <textarea id="userInput" rows="2" placeholder="{{ t.chat_placeholder }}"></textarea>
-      <button id="sendBtn" type="button" class="btn btn-dark btn-pill send-btn">{{ t.send }}</button>
+      <button id="sendBtn" type="button" class="btn btn-orange px-4 py-2 send-btn">{{ t.send }}</button>
     </div>
   </section>
 
@@ -83,7 +83,7 @@
       </article>
     </div>
 
-    <a href="{% url 'wizard' %}?lang={{ current_lang }}" class="btn btn-outline-dark btn-pill sidecard-cta">{{ t.prefer_wizard }}</a>
+    <a href="{% url 'wizard' %}?lang={{ current_lang }}" class="btn btn-primary px-4 py-2 sidecard-cta">{{ t.prefer_wizard }}</a>
   </aside>
 </section>
 {% endblock %}
