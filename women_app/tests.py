@@ -3,6 +3,7 @@ from datetime import date, timedelta
 from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
+from django.core.cache import cache
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
 from django.test import Client, TestCase
@@ -322,6 +323,29 @@ class OperationsAndSeedTests(TestCase):
         self.assertEqual(Scheme.objects.count(), 0)
         call_command("seed_schemes")
         self.assertGreaterEqual(Scheme.objects.count(), 1)
+
+    @patch("women_app.eligibility.MIN_DB_SCHEME_COUNT", 5)
+    @patch("women_app.eligibility._load_schemes_from_json")
+    def test_get_all_schemes_falls_back_to_json_when_db_is_under_threshold(self, mock_load_json):
+        from women_app.eligibility import get_all_schemes
+
+        cache.clear()
+        Scheme.objects.create(
+            name="Tiny DB Scheme",
+            category="education",
+            description="small dataset row",
+            eligibility="open",
+            official_source_name="Test Department",
+            url="https://example.gov.in/tiny-db-scheme",
+        )
+        mock_load_json.return_value = [
+            {"name": "JSON Scheme 1", "category": "education", "description": "desc 1"},
+            {"name": "JSON Scheme 2", "category": "financial", "description": "desc 2"},
+        ]
+
+        records = get_all_schemes()
+        self.assertEqual(len(records), 2)
+        self.assertEqual({item["name"] for item in records}, {"JSON Scheme 1", "JSON Scheme 2"})
 
     def test_sync_state_portals_creates_records(self):
         call_command("sync_state_portals", limit=5, skip_url_check=True)

@@ -85,6 +85,11 @@ try:
 except (TypeError, ValueError):
     SCHEME_CACHE_SECONDS = 300
 
+try:
+    MIN_DB_SCHEME_COUNT = max(1, int(str(os.getenv("MIN_DB_SCHEME_COUNT", "5000")).strip()))
+except (TypeError, ValueError):
+    MIN_DB_SCHEME_COUNT = 5000
+
 
 def match_score_percent(score: int) -> int:
     if score <= 0:
@@ -279,6 +284,22 @@ def _db_scheme_records() -> List[Dict]:
     return []
 
 
+def _preferred_scheme_records() -> List[Dict]:
+    """
+    Prefer DB records in normal operation, but auto-fallback to bundled JSON
+    when DB data is present but clearly incomplete (common in first deploys).
+    """
+    db_records = _db_scheme_records()
+    if not db_records:
+        return _load_schemes_from_json()
+
+    if len(db_records) < MIN_DB_SCHEME_COUNT:
+        json_records = _load_schemes_from_json()
+        if json_records:
+            return json_records
+    return db_records
+
+
 def _scheme_cache_signature() -> str:
     """
     Build a lightweight signature so cached normalized scheme data refreshes
@@ -301,7 +322,7 @@ def get_all_schemes() -> List[Dict]:
     if cached is not None:
         return cached
 
-    raw_records = _db_scheme_records() or _load_schemes_from_json()
+    raw_records = _preferred_scheme_records()
     normalized = [normalize_scheme_record(record) for record in raw_records if record.get("name")]
     cache.set(cache_key, normalized, timeout=SCHEME_CACHE_SECONDS)
     return normalized
